@@ -102,7 +102,7 @@ dat.with.agebrackets <- mutate( dat.with.age , agegrp = ifelse( age < 20 , "Teen
 ```
 
 
-```{r Average Length of Bike Ride by Start Time, echo=FALSE}
+```{r Cristian's Dumbbell Plots, echo=FALSE}
 
 NYCB <- tbl_df( dat )
 

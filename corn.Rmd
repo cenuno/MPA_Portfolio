@@ -1,0 +1,115 @@
+---
+title: "Corn"
+author: "Cristian E. Nuno"
+date: "October 6, 2016"
+output: html_document
+---
+```{r chunk1, ref.label="chunk2", echo=FALSE}
+```
+```{r}
+plot( x=fertilizer, y=corn.height )
+```
+
+```{r chunk2}
+# Practice
+
+fertilizer <- 1:100
+corn.height <- 250 + 2*fertilizer + 20*rnorm(100) - 0.02*fertilizer^2
+#plot( x=fertilizer, y=corn.height )
+```
+
+```{r}
+# Improve It
+
+plot(
+x=fertilizer, y=corn.height,
+xlab="Fertilizer (mg)",
+ylab="Corn Height (cm)",
+main="Relationship Between Fertilizer Intensity and Corn Growth"
+)
+```
+
+```{r}
+# Explore
+
+plot(
+x=fertilizer, y=corn.height,
+xlab="Fertilizer (mg)",
+ylab="Corn Height (cm)",
+main="Relationship Between Fertilizer Intensity and Corn Growth",
+pch=19,
+col="darkgoldenrod2",
+cex=2
+)
+```
+
+```{r}
+# Open up white space by dropping plot box or some sides
+
+plot(
+x=fertilizer, y=corn.height,
+xlab="Fertilizer (mg)",
+ylab="Corn Height (cm)",
+main="Relationship Between Fertilizer Intensity and Corn Growth",
+pch=19,
+col="darkgoldenrod2",
+cex=2,
+bty="n" # removes box corners
+)
+
+plot(
+x=fertilizer, y=corn.height,
+xlab="Fertilizer (mg)",
+ylab="Corn Height (cm)",
+main="Relationship Between Fertilizer Intensity and Corn Growth",
+pch=19,
+col="darkgoldenrod2",
+cex=2,
+bty="L" # leaves box with y-axis and x-axis
+)
+```
+
+```{r}
+# We can add lines to highlight trends (a regression is just the average of Y for each X).
+
+plot(
+x=fertilizer, y=corn.height,
+xlab="Fertilizer (mg)",
+ylab="Corn Height (cm)",
+main="Relationship Between Fertilizer Intensity and Corn Growth",
+pch=19,
+col="gray",
+cex=2,
+bty="n"
+)
+lines( lowess( fertilizer, corn.height ), col="darkgoldenrod2", lwd=4 )
+```
+
+```{r}
+# In order to add narrative to your graphs, you can add points and text.
+# The points() function operates with basically the same parameters as the plot() function. 
+# The text() function uses the same X and Y coordinates, 
+# but you also have to add an argument for the text that you want added to the plot.
+# Let’s highlight the tallest corn stalk as an example
+
+this.one <- which.max( corn.height )
+tallest.x <- fertilizer[ this.one ]
+tallest.y <- corn.height[ this.one ]
+
+plot(
+      x=fertilizer, y=corn.height,
+      xlab="Fertilizer (mg)",
+      ylab="Corn Height (cm)",
+      main="Relationship Between Fertilizer Intensity and Corn Growth",
+      pch=19,
+      col="gray",
+      cex=2,
+      bty="n"
+)
+
+lines( lowess( fertilizer, corn.height ), col="darkgoldenrod2", lwd=4 )
+
+points( x=tallest.x, y=tallest.y, cex=2.5, col="darkgoldenrod2" )
+text( x=tallest.x, y=tallest.y, labels="Tallest Stalk", pos=4, col="darkgoldenrod2" )
+```
+

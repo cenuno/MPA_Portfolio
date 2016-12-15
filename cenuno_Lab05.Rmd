@@ -1,0 +1,63 @@
+---
+title: "Lab 05"
+author: "Cristian E. Nuno"
+date: "October 11, 2016"
+output: html_document
+---
+```{r results='hide', message=FALSE}
+# Load Necessary Packages and Data
+library( Lahman )
+data( Teams )
+library( pander )
+library( dplyr )
+```
+
+Examine the relationship between hits and wins using a scatterplot for teams post 1990. Annotate two outliers on the graph with the teamID. 
+
+```{r}
+post.1990 <- filter(.data=Teams, yearID >= 1990 )
+attach( post.1990 ) 
+
+# identiy points using identify( post.1990$H, post.1990$W)
+post.1990[ 237, ] #information about 1998 New York Yankees
+post.1990[ 679, ] #information about 2013 Houston Astros
+
+# Annontate these outliers
+plot.new()
+plot(H, W, main="The Key Ingredient: Relationship between Hits and Wins", 
+     xlab="Hits by Team ", ylab="Wins by Team ", 
+     pch=19, cex=.5, bty="L", col="gray",
+     lines( lowess( H, W ), col="darkgoldenrod2", lwd=6 )
+)
+# Highlighting the Astros
+points( x=1307, y=51, cex=1.5, col="firebrick4")
+text( x=1307, y=51, labels="2013 Houston Astros", cex=1, pos=4, col="firebrick4" )
+
+# Highlighting the Yankees
+points( x=1625, y=114, cex=1.5, col="steelblue")
+text( x=1625, y=114, labels="1998 New York Yankees", cex=.5, post=4, col="steelblue")
+```
+
+Examine the relationship between ERA and Wins using a scatterplot post 1990. Annotate two outliers on the graph with the teamID. 
+
+```{r}
+# identiy points using identify( ERA, W)
+attach( post.1990 )
+post.1990[ 237, ] #information about 1998 New York Yankees
+post.1990[ 107, ] #information about 2013 Houston Astros
+
+# Annontate these outliers
+plot.new()
+plot(ERA, W, main="From the Mound: Relationship between Team ERA and Wins", 
+     xlab="ERA by Team ", ylab="Wins by Team ", 
+     pch=19, cex=.5, bty="L", col="gray",
+     lines( lowess( ERA, W ), col="royalblue", lwd=6 ) )
+
+# Highlighting the Braves
+points( x=3.57, y=68, cex=1.5, col="firebrick4")
+text( x=3.57, y=68, labels="1994 Atlanta Braves", cex=1, pos=4, col="firebrick4" )
+
+# Highlighting the Yankees
+points( x=3.82, y=114, cex=1.5, col="steelblue")
+text( x=3.82, y=114, labels="1998 New York Yankees", cex=1, post=4, col="steelblue")
+```

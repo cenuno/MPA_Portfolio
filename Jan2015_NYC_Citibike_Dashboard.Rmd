@@ -1,0 +1,733 @@
+---
+title: "January 2015 NYC Citi Bike Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: menu
+    theme: united
+    vertical_layout: scroll
+    runtime: shiny
+runtime: shiny
+
+---
+```{r setup, include=FALSE}
+
+dat <- readRDS( gzcon(url("https://cdn.rawgit.com/LegionOfLecy/OriginalNYCBikeData/master/NYCBikeShareData.rds")))
+library(dplyr)
+library(reshape)
+library(ggmap)
+library(ggplot2)
+library( pander )
+library( geosphere )
+library( plotly )
+library( RCurl )
+library(scatterplot3d)
+library(shiny)
+library(DT)
+
+```
+
+
+```{r} 
+#building data set - Stephanie
+
+starttime.character <- as.character(dat$starttime)
+subStartTime<-substr(starttime.character, start=10, stop=15)
+
+stoptime.character <- as.character(dat$stoptime)
+subStopTime <-substr(stoptime.character, start=10, stop=15)
+
+starttime_num <- sapply(strsplit(subStartTime,":"), #makes start time into a numeric character (minutes become fractional hours)
+       function(x) {
+           x <- as.numeric(x)
+           x[1]+x[2]/60
+       }
+)
+
+stoptime_num <- sapply(strsplit(subStopTime,":"), #makes stop time into a numeric character (minutes become fractional hours)
+       function(x) {
+           x <- as.numeric(x)
+           x[1]+x[2]/60
+       }
+)
+
+dat.rtime <- mutate( dat , starttime_num = round(starttime_num) , stoptime_num = round(stoptime_num) ) #adds a column with numeric start time and a column with numeric stop time
+
+dat.rtime.age <- mutate( dat.rtime , age = 2016 - birth.year ) #adds a column with age
+
+#gatering data to plot
+
+teen <- filter(dat.rtime.age , age < 20 )
+twenty <- filter(dat.rtime.age , age < 30 & age > 20 )
+thirty <- filter(dat.rtime.age , age < 40 & age > 29 )
+forty <- filter(dat.rtime.age , age < 50 & age > 39 )
+fifty <- filter(dat.rtime.age , age < 60 & age > 49 )        
+sixtyplus <- filter(dat.rtime.age , age > 60 )
+
+
+teen_grp <- group_by( teen , starttime_num )
+teen.time <- as.data.frame(summarise( teen_grp , riders.at.time = n()) ) 
+
+twenty_grp <- group_by( twenty , starttime_num )
+twenty.time <- as.data.frame(summarise( twenty_grp , riders.at.time = n()) ) 
+
+thirty_grp <- group_by( thirty , starttime_num )
+thirty.time <- as.data.frame(summarise( thirty_grp , riders.at.time = n()) ) 
+
+forty_grp <- group_by( forty , starttime_num )
+forty.time <- as.data.frame(summarise( forty_grp , riders.at.time = n()) ) 
+
+fifty_grp <- group_by( fifty , starttime_num )
+fifty.time <- as.data.frame(summarise( fifty_grp , riders.at.time = n()) ) 
+
+sixty_grp <- group_by( sixtyplus , starttime_num )
+sixty.time <- as.data.frame(summarise( sixty_grp , riders.at.time = n()) )
+
+```
+
+```{r} 
+## data- Linnea pie chart
+
+dat.stationgender<-select(dat,start.station.name, gender)
+sgtab <- table(dat.stationgender)
+sgdf <- as.data.frame(sgtab)
+lbls <- c("Unspecified", "Male", "Female")
+```
+
+
+```{r Heat Map Frequency by Age, DATA - Steph, echo=FALSE}
+# Heat Map - Station frequency by age
+dat.with.age <- mutate( dat , age = 2016 - birth.year )
+dat.with.agebrackets <- mutate( dat.with.age , agegrp = ifelse( age < 20 , "Teenager" , ifelse( age >= 20 & age <30 , "Twenties", ifelse( age >= 30 & age < 40 , "Thirties" , ifelse( age >= 40 & age < 50 , "Forties" , ifelse(age >= 50 & age < 60 , "Fifties", ifelse( age >= 60 , "Sixty Plus" , NA) ) ) ) ) ) )
+```
+
+
+```{r Average Length of Bike Ride by Start Time, echo=FALSE}
+
+NYCB <- tbl_df( dat )
+
+# Create Point A and Point B: Combine start and end station latitude and longitude
+start.LA.LO <- select(NYCB, start.station.latitude, start.station.longitude)
+end.LA.LO <- select(NYCB, end.station.latitude, end.station.longitude)
+
+# Calculate distance. Convert meters to miles and round to the nearest 100th.
+distance <- round(distGeo(start.LA.LO, end.LA.LO, 
+                          a=6378137, f=1/298.257223563)*0.000621371, 2)
+
+# Calculate speed as the difference between stop time and start time. 
+# Speed is measured in minutes. Round to the nearest 100th.
+speed <- round((stoptime_num - starttime_num)*100, 2)
+
+# Calculate age as the difference between the current year (2016) and the birth year
+age.dat <- 2016 - NYCB$birth.year
+
+# Add these new variables into a new dataframe
+NYCB <- mutate( dat , starttime_num = starttime_num , stoptime_num = stoptime_num, 
+                distance = distance, speed = speed, age = age.dat )
+
+# Label half hour intervals
+half.hour.labels <- c("12:00-12:30 am", "12:30-1:00 am", "1:00-1:30 am", "1:30-2:00 am",
+                      "2:00-2:30 am","2:30-3:00 am", "3:00-3:30 am", "3:30-4:00 am",
+                      "4:00-4:30 am", "4:30-5:00 am","5:00-5:30 am", "5:30-6:00 am",
+                      "6:00-6:30 am", "6:30-7:00 am","7:00-7:30 am", "7:30-8:00 am",
+                      "8:00-8:30 am", "8:30-9:00 am","9:00-9:30 am", "9:30-10:00 am",
+                      "10:00-10:30 am","10:30-11:00 am", "11:00-11:30 am", "11:30-12:00 pm",
+                      "12:00-12:30 pm", "12:30-1:00pm", "1:00-1:30 pm", "1:30-2:00 pm",
+                      "2:00-2:30 pm","2:30-3:00 pm", "3:00-3:30 pm", "3:30-4:00 pm",
+                      "4:00-4:30 pm", "4:30-5:00 pm","5:00-5:30 pm", "5:30-6:00 pm",
+                      "6:00-6:30 pm", "6:30-7:00 pm","7:00-7:30 pm", "7:30-8:00 pm",
+                      "8:00-8:30 pm", "8:30-9:00 pm","9:00-9:30 pm", "9:30-10:00 pm",
+                      "10:00-10:30 pm","10:30-11:00 pm", "11:00-11:30 pm", "11:30-12:00 am")
+
+# Label age intervals
+age.labels <- c("17-21", "21-25", "25-29", "29-33", "33-37", "37-41", "41-45",
+                "45-49", "49-53", "53-57", "57-61", "61-65", "65-69", "73-77",
+                "77-81", "81-85", "85-89", "89-93", "93-97", "97-100")
+
+# Select variables for distance analysis
+distance.by.gender.time <- select( NYCB, distance, gender, starttime_num)
+distance.by.gender.age <- select(NYCB, distance, gender, age)
+
+speed.by.gender.time <- select( NYCB, speed, gender, starttime_num)
+speed.by.gender.age <- select( NYCB, speed, gender, age)
+
+# Partition variables by gender
+distance.by.females.time <- filter( distance.by.gender.time, gender==2)
+distance.by.males.time <- filter( distance.by.gender.time, gender==1)
+
+distance.by.females.age <- filter( distance.by.gender.age, gender==2)
+distance.by.males.age <- filter( distance.by.gender.age, gender==1)
+
+speed.by.females.time <- filter( speed.by.gender.time, gender==2)
+speed.by.males.time <- filter( speed.by.gender.time, gender==1)
+
+speed.by.females.age <- filter( speed.by.gender.age, gender==2)
+speed.by.males.age <- filter( speed.by.gender.age, gender==1)
+
+# Separate gender speed and distance by time and age
+
+distance.by.females.time <- mutate(distance.by.females.time,
+                              half_hour=cut(starttime_num,
+                                            breaks=seq( from=0, to=24, by=0.5 ),
+                                            labels=half.hour.labels )
+                              )
+
+distance.by.males.time <- mutate(distance.by.males.time,
+                              half_hour=cut(starttime_num,
+                                            breaks=seq( from=0, to=24, by=0.5 ),
+                                            labels=half.hour.labels )
+                              )
+
+distance.by.females.age <- mutate(distance.by.females.age,
+                              age_group=cut(age,
+                                            breaks=seq( from=17, to=100, by=4 ),
+                                            labels=age.labels )
+                              )
+
+distance.by.males.age <- mutate(distance.by.males.age,
+                              age_group=cut(age,
+                                            breaks=seq( from=17, to=100, by=4 ),
+                                            labels=age.labels )
+                              )
+
+speed.by.females.time <- mutate(speed.by.females.time,
+                               half_hour=cut(starttime_num,
+                                             breaks=seq( from=0, to=24, by=0.5),
+                                             labels=half.hour.labels)
+                               )
+speed.by.males.time <- mutate(speed.by.males.time,
+                               half_hour=cut(starttime_num,
+                                             breaks=seq( from=0, to=24, by=0.5),
+                                             labels=half.hour.labels)
+                               )
+
+speed.by.females.age <- mutate(speed.by.females.age,
+                               age_group=cut(age,
+                                             breaks=seq( from=17, to=100, by=4),
+                                             labels=age.labels)
+                           )
+speed.by.males.age <- mutate(speed.by.males.age,
+                               age_group=cut(age,
+                                             breaks=seq(from=17, to=100, by=4),
+                                             labels=age.labels)
+                           )
+
+# Group separated distance and speed variables by half hour and age groups
+distance.by.females.time <- group_by( distance.by.females.time, half_hour)
+distance.by.males.time <- group_by( distance.by.males.time, half_hour)
+
+distance.by.females.age <- group_by( distance.by.females.age, age_group)
+distance.by.males.age <- group_by( distance.by.males.age, age_group)
+
+speed.by.females.time <- group_by( speed.by.females.time, half_hour)
+speed.by.males.time <- group_by( speed.by.males.time, half_hour)
+
+speed.by.females.age <- group_by( speed.by.females.age, age_group)
+speed.by.males.age <- group_by( speed.by.males.age, age_group)
+
+# Aggregate the average distance and speed (using median) for each group by half-hour
+distance.by.females.time <- setNames( aggregate( distance.by.females.time$distance,
+                                     list( distance.by.females.time$half_hour), median),
+                           c( "Time", "Distance_Female"))
+
+distance.by.males.time <- setNames( aggregate( distance.by.males.time$distance,
+                                     list( distance.by.males.time$half_hour), median),
+                           c( "Time", "Distance_Male"))
+
+distance.by.females.age <- setNames( aggregate( distance.by.females.age$distance,
+                                     list( distance.by.females.age$age_group), median),
+                           c( "Age_Group", "Distance_Female"))
+
+distance.by.males.age <- setNames( aggregate( distance.by.males.age$distance,
+                                              list( distance.by.males.age$age_group), median),
+                                   c( "Age_Group", "Distance_Male"))
+
+speed.by.females.time <- setNames(aggregate(speed.by.females.time$speed,
+                                     list(speed.by.females.time$half_hour), median),
+                           c("Time", "Speed_Female"))
+
+speed.by.males.time <- setNames(aggregate(speed.by.males.time$speed,
+                                     list(speed.by.males.time$half_hour), median),
+                           c("Time", "Speed_Male"))
+
+speed.by.females.age <- setNames( aggregate( speed.by.females.age$speed,
+                                     list( speed.by.females.age$age_group), median),
+                           c( "Age_Group", "Speed_Female"))
+
+speed.by.males.age <- setNames( aggregate( speed.by.males.age$speed,
+                                     list( speed.by.males.age$age_group), median),
+                           c( "Age_Group", "Speed_Male"))
+
+# Merge Four Distance and Four Speed datasets by Time and Age_Group
+final.distance.time <- merge( distance.by.females.time,
+                              distance.by.males.time,
+                              by="Time"
+                         )
+
+final.distance.age <- merge( distance.by.females.age,
+                             distance.by.males.age,
+                             by="Age_Group"
+                             )
+
+final.speed.time <- merge( speed.by.females.time,
+                           speed.by.males.time,
+                           by="Time"
+                           )
+
+final.speed.age <- merge( speed.by.females.age,
+                          speed.by.males.age,
+                          by="Age_Group"
+                          )
+
+# Arrange merged datasets by Time and Age Group
+final.distance.time <- arrange( final.distance.time, Time)
+final.distance.age <- arrange( final.distance.age, Age_Group)
+
+final.speed.time <- arrange( final.speed.time, Time)
+final.speed.age <- arrange( final.speed.age, Age_Group)
+
+# Set plot boundaries
+m <- list(
+  l = 100,
+  r = 100,
+  b = 50,
+  t = 50,
+  pad = 4
+)
+
+# Design distance by time dumbbell plot
+distance.time.plot <- plot_ly(final.distance.time, color = I("gray80")) %>%
+  add_segments(x = ~Distance_Female, xend = ~Distance_Male, y = ~Time, yend = ~Time,
+               showlegend = FALSE) %>%
+  add_markers(x = ~Distance_Female, y = ~Time, name = "Female", color = I("navyblue")) %>%
+  add_markers(x = ~Distance_Male, y = ~Time, name = "Male", color = I("palegreen3")) %>%
+  layout(
+     title = "Bike Ride Distance by Gender Throughout the Day",
+     xaxis = list(title = "Average Distance (in miles)"),
+     yaxis = list(title = ""),
+     margin = m
+     )
+
+# Design distance by age dumbbell plot
+distance.age.plot <- plot_ly(final.distance.age, color = I("gray80")) %>%
+  add_segments(x = ~Distance_Female, xend = ~Distance_Male, y = ~Age_Group, yend = ~Age_Group,
+               showlegend = FALSE) %>%
+  add_markers(x = ~Distance_Female, y = ~Age_Group, name = "Female", color = I("navyblue")) %>%
+  add_markers(x = ~Distance_Male, y = ~Age_Group, name = "Male", color = I("palegreen3")) %>%
+  layout(
+     title = "Bike Ride Distance by Age Group and Gender",
+     xaxis = list(title = "Average Distance (in miles)"),
+     yaxis = list(title = ""),
+     margin = m
+     )
+
+# Design speed by time dumbbell plot
+speed.time.plot <- plot_ly(final.speed.time, color = I("gray80")) %>%
+  add_segments(x = ~Speed_Female, xend = ~Speed_Male, y = ~Time, yend = ~Time,
+               showlegend = FALSE) %>%
+  add_markers(x = ~Speed_Female, y = ~Time, name = "Female", color = I("navyblue")) %>%
+  add_markers(x = ~Speed_Male, y = ~Time, name = "Male", color = I("palegreen3")) %>%
+  layout(
+     title = "Bike Ride Speed by Gender Throughout the Day",
+     xaxis = list(title = "Average Speed (in minutes)"),
+     yaxis = list(title = ""),
+     margin = m
+     )
+
+# Design speed by age dummbell plot
+speed.age.plot <- plot_ly(final.speed.age, color = I("gray80")) %>%
+  add_segments(x = ~Speed_Female, xend = ~Speed_Male, y = ~Age_Group, yend = ~Age_Group,
+               showlegend = FALSE) %>%
+  add_markers(x = ~Speed_Female, y = ~Age_Group, name = "Female", color = I("navyblue")) %>%
+  add_markers(x = ~Speed_Male, y = ~Age_Group, name = "Male", color = I("palegreen3")) %>%
+  layout(
+     title = "Bike Ride Speed by Age Group and Gender",
+     xaxis = list(title = "Average Speed (in minutes)"),
+     yaxis = list(title = ""),
+     margin = m
+     )
+```
+     
+
+
+
+
+
+
+Static Graphs {data-icon="fa-bar-chart"}
+===================================== 
+
+Row
+-----------------------------------------------------------------------
+### Gender by Station
+
+```{r}
+selectInput( inputId='station',
+            label = h3("Choose Station"), 
+            choices= as.character(sgdf$start.station.name),
+            selected = sgdf$start.station.name == "1 Ave & E 15 St",
+           )
+
+renderPlot({
+station <- filter(sgdf, start.station.name == input$station)  
+
+pie(station$Freq , labels=lbls,col = c("white", "navy", "palegreen3"), main="Gender Distribution by Station",border=NA, font=14, cex=1.3, cex.main=1.5, radius=.7  )
+})
+```
+
+### Rental Age Graphs
+
+```{r}
+
+#Plot most common times to check out a bike for each age group
+
+par(mfrow = c(2, 3), oma=c(3, 3, 3, 3))
+
+
+#Teen
+plot.new()
+plot.window( xlim = c( 0 , 24 ) , ylim = c( 0 , 10000) )
+
+points( teen.time$starttime_num , teen.time$riders.at.time , type = "l", lwd = 3 , col = "cadetblue4")
+points( twenty.time$starttime_num , twenty.time$riders.at.time , type = "l" , col = "azure3" )
+points( thirty.time$starttime_num , thirty.time$riders.at.time , type = "l" , col = "azure3" )
+points( forty.time$starttime_num , forty.time$riders.at.time , type = "l" , col = "azure3" )
+points( fifty.time$starttime_num , fifty.time$riders.at.time , type = "l" , col = "azure3" )
+points( sixty.time$starttime_num , sixty.time$riders.at.time , type = "l" , col = "azure3")
+
+title(main = "10 to 19 year olds")
+#axis( side = 1 , tick = F , at = seq(0, 24 , 6) , labels = c( "12 am", "6 am" , "12 pm" , "6 pm" , "12 am") , las = 1 , line = .5)
+axis( side = 2 , tick = F , at = seq(0, 10000 , 2500) , labels = c( 0, 2500, 5000, 7500, 10000) , las = 1)
+
+#Twenty
+plot.new()
+plot.window( xlim = c( 0 , 24 ) , ylim = c( 0 , 10000) )
+
+points( teen.time$starttime_num , teen.time$riders.at.time , type = "l" , col = "azure3")
+points( twenty.time$starttime_num , twenty.time$riders.at.time , type = "l" , lwd = 3 , col = "cadetblue4")
+points( thirty.time$starttime_num , thirty.time$riders.at.time , type = "l" , col = "azure3")
+points( forty.time$starttime_num , forty.time$riders.at.time , type = "l" , col = "azure3")
+points( fifty.time$starttime_num , fifty.time$riders.at.time , type = "l" , col = "azure3")
+points( sixty.time$starttime_num , sixty.time$riders.at.time , type = "l" , col = "azure3")
+
+title(main = "20 to 29 year olds")
+#axis( side = 1 , tick = F , at = seq(0, 24 , 6) , labels = c( "12 am", "6 am" , "12 pm" , "6 pm" , "12 am") , las = 1 , line = .5)
+
+
+#Thirty
+plot.new()
+plot.window( xlim = c( 0 , 24 ) , ylim = c( 0 , 10000) )
+
+points( teen.time$starttime_num , teen.time$riders.at.time , type = "l" , col = "azure3")
+points( twenty.time$starttime_num , twenty.time$riders.at.time , type = "l" , col = "azure3")
+points( thirty.time$starttime_num , thirty.time$riders.at.time , type = "l" , lwd = 3 , col = "cadetblue4")
+points( forty.time$starttime_num , forty.time$riders.at.time , type = "l" , col = "azure3")
+points( fifty.time$starttime_num , fifty.time$riders.at.time , type = "l" , col = "azure3")
+points( sixty.time$starttime_num , sixty.time$riders.at.time , type = "l" , col = "azure3")
+
+title(main = "30 to 39 year olds")
+#axis( side = 1 , tick = F , at = seq(0, 24 , 6) , labels = c( "12 am", "6 am" , "12 pm" , "6 pm" , "12 am") , las = 1 , line = .5)
+
+
+#Forty
+plot.new()
+plot.window( xlim = c( 0 , 24 ) , ylim = c( 0 , 10000) )
+
+points( teen.time$starttime_num , teen.time$riders.at.time , type = "l" , col = "azure3")
+points( twenty.time$starttime_num , twenty.time$riders.at.time , type = "l" , col = "azure3")
+points( thirty.time$starttime_num , thirty.time$riders.at.time , type = "l" , col = "azure3")
+points( forty.time$starttime_num , forty.time$riders.at.time , type = "l" , lwd = 3 , col = "cadetblue4")
+points( fifty.time$starttime_num , fifty.time$riders.at.time , type = "l" , col = "azure3")
+points( sixty.time$starttime_num , sixty.time$riders.at.time , type = "l" , col = "azure3")
+
+title(main = "40 to 49 year olds")
+axis( side = 1 , tick = F , at = seq(0, 24 , 6) , labels = c( "12 am", "6 am" , "12 pm" , "6 pm" , "12 am") , las = 1 , line = .5)
+axis( side = 2 , tick = F , at = seq(0, 10000 , 2500) , labels = c( 0, 2500, 5000, 7500, 10000) , las = 1)
+
+#Fifty
+plot.new()
+plot.window( xlim = c( 0 , 24 ) , ylim = c( 0 , 10000) )
+
+points( teen.time$starttime_num , teen.time$riders.at.time , type = "l" , col = "azure3")
+points( twenty.time$starttime_num , twenty.time$riders.at.time , type = "l" , col = "azure3")
+points( thirty.time$starttime_num , thirty.time$riders.at.time , type = "l" , col = "azure3")
+points( forty.time$starttime_num , forty.time$riders.at.time , type = "l" , col = "azure3")
+points( fifty.time$starttime_num , fifty.time$riders.at.time , type = "l" , lwd = 3 , col = "cadetblue4")
+points( sixty.time$starttime_num , sixty.time$riders.at.time , type = "l" , col = "azure3")
+
+title(main = "50 to 59 year olds")
+axis( side = 1 , tick = F , at = seq(0, 24 , 6) , labels = c( "12 am", "6 am" , "12 pm" , "6 pm" , "12 am") , las = 1 , line = .5)
+
+#SixtyPlus
+plot.new()
+plot.window( xlim = c( 0 , 24 ) , ylim = c( 0 , 10000) )
+
+points( teen.time$starttime_num , teen.time$riders.at.time , type = "l" , col = "azure3")
+points( twenty.time$starttime_num , twenty.time$riders.at.time , type = "l" , col = "azure3")
+points( thirty.time$starttime_num , thirty.time$riders.at.time , type = "l" , col = "azure3")
+points( forty.time$starttime_num , forty.time$riders.at.time , type = "l" , col = "azure3")
+points( fifty.time$starttime_num , fifty.time$riders.at.time , type = "l" , col = "azure3")
+points( sixty.time$starttime_num , sixty.time$riders.at.time , type = "l" , lwd = 3 , col = "cadetblue4")
+
+title(main = " 60+ year olds")
+axis( side = 1 , tick = F , at = seq(0, 24 , 6) , labels = c( "12 am", "6 am" , "12 pm" , "6 pm" , "12 am") , las = 1 , line = .5)
+
+
+mtext("Number of rentals each hour by age group" , side=3, outer=T , cex=1.5)
+
+
+```
+
+Row
+-----------------------------------------------------------------------
+### Distance-Age-Duration
+
+```{r}
+scatterplot3d( x = NYCB$tripduration, y = NYCB$age, z = NYCB$distance, color="darkorchid3", main= "Distance vs. Age vs. Duration", xlab="Trip Duration", ylab="Age", zlab="Distance", cex.axis=.6, grid=T )
+```
+
+
+### Most Popular Stations
+
+```{r}
+
+dat.start.station <- group_by( dat, start.station.id ) %>% count( start.station.id ) %>% arrange( desc(n) )
+
+dat.end.station <- group_by( dat, end.station.id ) %>% count( end.station.id ) %>% arrange( desc(n) )
+
+five.start.station <- as.data.frame( head( dat.start.station, n=5L ) )
+
+plot.new()
+
+lower="Customers/Subscribers"
+upper="Stations"
+bp<-barplot(five.start.station$n, beside = TRUE, horiz = TRUE, border=NA, names="", col="palegreen3")
+title(main="Top 5 Frequently Used Start Stations")
+title(xlab="Customers/Subscribers", col="palegreen3")
+title(ylab="Start Stations")
+text(bp, lab=c("8 Ave & W ","Lafayette St & E", "E 43 St & Vanderbilt", "W 21 St & 6 Ave", "8 Ave & W 33 St" ), pos=4)
+
+```
+
+
+
+Dumbbell Plots {data-icon="fa-sliders"}
+=====================================     
+Row
+-----------------------------------------------------------------------
+### Distance Gender Plot
+    
+```{r}
+distance.time.plot
+```
+
+
+### Distance Age Plot
+```{r}
+distance.age.plot
+```
+
+Row
+-----------------------------------------------------------------------
+### Speed Time Plot
+```{r}
+speed.time.plot
+```
+
+
+### Speed Age Plot
+```{r}
+speed.age.plot
+```
+
+City Bike Map - NYC {data-icon="fa-map"}
+=====================================     
+
+### Heat Map of Frequency by Age and Day of Week {data-height=910}
+    
+
+```{r Heat Map Frequency by Age - Steph, echo=FALSE}
+
+dat.with.age <- mutate( dat , age = 2016 - birth.year )
+dat.with.agebrackets <- mutate( dat.with.age , agegrp = ifelse( age < 20 , "Teenager" , ifelse( age >= 20 & age <30 , "Twenties", ifelse( age >= 30 & age < 40 , "Thirties" , ifelse( age >= 40 & age < 50 , "Forties" , ifelse(age >= 50 & age < 60 , "Fifties", ifelse( age >= 60 , "Sixty Plus" , NA) ) ) ) ) ) )
+
+subStartDay<-substr(starttime.character, start=3, stop=4)
+subStartDay.2 <- gsub("/" , "" , subStartDay)
+subStartDay.3 <- as.numeric(subStartDay.2)
+dat.with.daychar <- mutate( dat.with.agebrackets , daychar = subStartDay.3)
+dat.with.day.age <- mutate( dat.with.daychar , daywk = ifelse( daychar == 3 | daychar == 4 | daychar == 10 | daychar == 11 | daychar == 17 | daychar == 18 | daychar == 24 | daychar == 25 | daychar == 31 , "Weekend",  "Weekday"))
+
+selectInput( inputId='type', 
+            label='Age Group', 
+            choices= c("All", "Teenager", "Twenties", "Thirties", "Forties", "Fifties", "Sixty Plus"),
+            selected="Twenties"
+           )
+
+radioButtons(inputId = "daytype",
+             label= 'Day of the Week',
+             choices= c("All", "Weekday","Weekend"), 
+             selected = "Weekday",
+             inline = FALSE, width = NULL
+             )
+
+renderPlot ({
+  
+if( input$type == "All" & input$daytype == "All"){
+  
+one.type <- dat.with.day.age
+  
+start.station.1 <- group_by( one.type , start.station.id )
+start.station.2 <- as.data.frame(summarise( start.station.1 , freq = n()) )
+dat.start.freq <- merge( dat , start.station.2 )
+dat.start.freq.small <- dat.start.freq %>% distinct(start.station.id , .keep_all = TRUE)
+
+end.station.1 <- group_by( one.type , end.station.id )
+end.station.2 <- as.data.frame(summarise( end.station.1 , freq = n()) )
+dat.end.freq <- merge( dat , end.station.2 )
+dat.end.freq.small <- dat.end.freq %>% distinct(end.station.id , .keep_all = TRUE)
+
+
+
+nyc <- get_map( location='new york city, ny', zoom = 13, color="bw" )
+
+ggmap( nyc )
+
+nyc_points <- ggmap( nyc, extent="device" )
+
+nyc_points <- nyc_points + geom_point( data=dat.end.freq.small, 
+                                       aes( x=end.station.longitude, y=end.station.latitude , size=freq ), 
+                                       color="chartreuse3" , 
+                                       alpha = .5) + geom_point( data=dat.start.freq.small, 
+                                       aes( x=start.station.longitude, y=start.station.latitude , size=freq), 
+                                       color="royalblue" , 
+                                       alpha = .5) +ggtitle("Frequency of Bikes Checked In and Out") + theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=32, hjust=0)) + scale_size( name = "Number of Riders", range = c( .5 ,  log(dat.end.freq.small$freq[which.max(dat.end.freq.small$freq)])+4 ) )
+
+nyc_points 
+
+
+  
+} else if( input$type != "All" & input$daytype == "All") {
+  
+one.type <- filter( dat.with.day.age , agegrp == input$type)
+  
+start.station.1 <- group_by( one.type , start.station.id )
+start.station.2 <- as.data.frame(summarise( start.station.1 , freq = n()) )
+dat.start.freq <- merge( dat , start.station.2 )
+dat.start.freq.small <- dat.start.freq %>% distinct(start.station.id , .keep_all = TRUE)
+
+end.station.1 <- group_by( one.type , end.station.id )
+end.station.2 <- as.data.frame(summarise( end.station.1 , freq = n()) )
+dat.end.freq <- merge( dat , end.station.2 )
+dat.end.freq.small <- dat.end.freq %>% distinct(end.station.id , .keep_all = TRUE)
+
+
+
+nyc <- get_map( location='new york city, ny', zoom = 13, color="bw" )
+
+ggmap( nyc )
+
+nyc_points <- ggmap( nyc, extent="device" )
+
+nyc_points <- nyc_points + geom_point( data=dat.end.freq.small, 
+                                       aes( x=end.station.longitude, y=end.station.latitude , size=freq ), 
+                                       color="chartreuse3" , 
+                                       alpha = .5) + geom_point( data=dat.start.freq.small, 
+                                       aes( x=start.station.longitude, y=start.station.latitude , size=freq), 
+                                       color="royalblue" , 
+                                       alpha = .5) +ggtitle("Frequency of Bikes Checked In and Out") + theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=32, hjust=0)) + scale_size( name = "Number of Riders", range = c( .5 ,  log(dat.end.freq.small$freq[which.max(dat.end.freq.small$freq)])+4 ) )
+
+nyc_points 
+   
+
+  
+} else if( input$type != "All" & input$daytype != "All") {
+  
+one.type <- filter( dat.with.day.age , agegrp == input$type & daywk == input$daytype)
+  
+start.station.1 <- group_by( one.type , start.station.id )
+start.station.2 <- as.data.frame(summarise( start.station.1 , freq = n()) )
+dat.start.freq <- merge( dat , start.station.2 )
+dat.start.freq.small <- dat.start.freq %>% distinct(start.station.id , .keep_all = TRUE)
+
+end.station.1 <- group_by( one.type , end.station.id )
+end.station.2 <- as.data.frame(summarise( end.station.1 , freq = n()) )
+dat.end.freq <- merge( dat , end.station.2 )
+dat.end.freq.small <- dat.end.freq %>% distinct(end.station.id , .keep_all = TRUE)
+
+
+
+nyc <- get_map( location='new york city, ny', zoom = 13, color="bw" )
+
+ggmap( nyc )
+
+nyc_points <- ggmap( nyc, extent="device" )
+
+nyc_points <- nyc_points + geom_point( data=dat.end.freq.small, 
+                                       aes( x=end.station.longitude, y=end.station.latitude , size=freq ), 
+                                       color="chartreuse3" , 
+                                       alpha = .5) + geom_point( data=dat.start.freq.small, 
+                                       aes( x=start.station.longitude, y=start.station.latitude , size=freq), 
+                                       color="royalblue" , 
+                                       alpha = .5) +ggtitle("Frequency of Bikes Checked In and Out") + theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=32, hjust=0)) + scale_size( name = "Number of Riders", range = c( .5 ,  log(dat.end.freq.small$freq[which.max(dat.end.freq.small$freq)])+4 ) )
+
+nyc_points 
+
+              
+
+  
+}  else {
+  
+one.type <- filter( dat.with.day.age , daywk == input$daytype)
+  
+start.station.1 <- group_by( one.type , start.station.id )
+start.station.2 <- as.data.frame(summarise( start.station.1 , freq = n()) )
+dat.start.freq <- merge( dat , start.station.2 )
+dat.start.freq.small <- dat.start.freq %>% distinct(start.station.id , .keep_all = TRUE)
+
+end.station.1 <- group_by( one.type , end.station.id )
+end.station.2 <- as.data.frame(summarise( end.station.1 , freq = n()) )
+dat.end.freq <- merge( dat , end.station.2 )
+dat.end.freq.small <- dat.end.freq %>% distinct(end.station.id , .keep_all = TRUE)
+
+
+
+nyc <- get_map( location='new york city, ny', zoom = 13, color="bw" )
+
+ggmap( nyc )
+
+nyc_points <- ggmap( nyc, extent="device" )
+
+nyc_points <- nyc_points + geom_point( data=dat.end.freq.small, 
+                                       aes( x=end.station.longitude, y=end.station.latitude , size=freq ), 
+                                       color="chartreuse3" , 
+                                       alpha = .5) + geom_point( data=dat.start.freq.small, 
+                                       aes( x=start.station.longitude, y=start.station.latitude , size=freq), 
+                                       color="royalblue" , 
+                                       alpha = .5) +ggtitle("Frequency of Bikes Checked In and Out") + theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=32, hjust=0)) + scale_size( name = "Number of Riders", range = c( .5 ,  log(dat.end.freq.small$freq[which.max(dat.end.freq.small$freq)])+4 ) )
+
+nyc_points 
+ 
+              
+
+}
+  })
+
+
+```
+    
+
+
+Data {data-icon="fa-database"}
+=====================================     
+
+### Gender Distribution Data
+```{r}
+dat.1 <- mutate( dat, Male=gender=="1", Female=gender=="2", Unspecified=gender=="0" )
+dat.2 <- select(dat.1, start.station.name, Male, Female)
+dat.3<- group_by( dat.2, start.station.name )
+dat.4 <- summarize( dat.3, TM=sum(Male=="TRUE"), TF=sum(Female=="TRUE") )
+dat.5<-as.data.frame(dat.4)
+dat.6 <- mutate(dat.5, diff=(TM-TF))
+datatable(dat.6, class = "display", options = list(pageLength =  10), colnames = c('Start Station', 'Total Male (M)', 'Total Female (F)', 'Difference M-F'), filter = 'top', rownames = FALSE, caption = 'Table 1: Usage of NYC Bike Stations by gender ')
+```
+

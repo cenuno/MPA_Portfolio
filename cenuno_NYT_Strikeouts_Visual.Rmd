@@ -1,0 +1,143 @@
+---
+output: html_document
+runtime: shiny
+---
+----title: "Strikeouts Over Time Visual"
+author: "Cristian E. Nuno"
+runtime: shiny
+output: html_document
+---
+
+```{r setup, echo=FALSE}
+# Load necessary packages
+library( Lahman )
+data( Teams )
+library( shiny )
+library( pander )
+library( dplyr )
+library( scales )
+```
+# Part I
+
+### Recreate The New York Times' Strikeout Graph from http://www.nytimes.com/interactive/2013/03/29/sports/baseball/Strikeouts-Are-Still-Soaring.html.
+```{r, echo=FALSE, message=FALSE, fig.height=6, fig.width=9}
+# Define average strikeouts by year, then define average strikeouts for whole league
+post.1900 <- filter(.data=Teams, yearID >= 1900 )
+ave.so <- post.1900$SO / post.1900$G
+league.ave.so <- tapply(ave.so, post.1900$yearID, mean, na.rm=TRUE)
+
+# Separate average strikeouts by team
+teams.post1900 <- filter( Teams , yearID >= 1900 )
+
+# Attach data
+attach( post.1900 )
+
+plot( yearID, ave.so, axes=FALSE, main="", 
+     xlab="", ylab="", xaxt="n", yaxt="n",
+     pch=19, cex=1, col=gray(0.9, alpha=1 ))
+
+# Plot league average
+points(names(league.ave.so), league.ave.so,
+       type="b", col="steelblue4", cex=1, pch=19)
+points(names(league.ave.so), league.ave.so,
+       type="l", col="steelblue4", cex=1, pch=19)
+
+# Add legend
+legend(1899, 8.7, "League Average", bty="n", lty=1, lwd=2.5, col="steelblue4")
+
+# Add gridlines
+grid(NA, 9, lwd = 2)
+
+# X-axis customization
+axis(side=1, at=seq(1900, 2020, by=10 ), cex.axis=1, 
+     lwd=1, tck=-.01, mgp=c(0,0,0) )
+
+# Y-axis customization
+axis(side=4, at=seq(0, 10, by=1 ), las=1, cex.axis=1, 
+     col.axis=gray(.5), col="white" ) 
+
+# Text outside plot
+mtext("Strikeouts on the Rise ", 
+      side=3, line=2, adj=.01, cex=1.5, col="black")
+mtext("There were more strikeouts in 2012 than at any other time in major league history.", 
+      side=3, line=1, adj=.01, cex=1, col="black")
+
+# Text inside plot
+text(1920.5, 9, "Strikeouts per game per team (by batters) ", 
+     cex=1, col="black")
+text(c(1917, 2007), c(2, 4.7), 
+     labels=c("US\nenters\nWorld War 1", "Mitchell Report\non steriods"),
+     cex=.65, col=gray(.5))
+#text(5, 5, label=input$Select, cex=4)
+
+# Line segments referring text back to league average data point
+segments(1917, 2.5, 1917, 3.5, col=gray(.5))
+segments(2007, 4.9, 2007, 6.5, col=gray(.5))
+```
+
+### Now Add User Input
+```{r echo=FALSE}
+selectInput( inputId='team', 
+            label='Strikeouts per game per team (by batters)', 
+            choices= unique(teams.post1900$name),
+            selected="Chicago Cubs"
+          )
+
+
+renderPlot({
+  # Attach data
+attach( post.1900 )
+
+plot( yearID, ave.so, axes=FALSE, main="", 
+     xlab="", ylab="", xaxt="n", yaxt="n",
+     pch=19, cex=1, col=gray(0.9, alpha=1 ))
+
+# Plot league average
+points(names(league.ave.so), league.ave.so,
+       type="b", col="steelblue4", cex=1, pch=19)
+points(names(league.ave.so), league.ave.so,
+       type="l", col="steelblue4", cex=1, pch=19)
+
+# Add legend
+legend(1899, 8.7, "League Average", bty="n", lty=1, lwd=2.5, col="steelblue4")
+
+# Plot user input team average
+user.team <- filter( Teams , name == input$team )
+user.team.so <- user.team$SO / user.team$G
+points( user.team$yearID , user.team.so ,  type="b", lwd = 2 , pch = 19 , col="darkgoldenrod1" )
+points( user.team$yearID , user.team.so ,  type="l", lwd = 2 , pch = 19 , col="darkgoldenrod1" )
+
+# Add legend
+legend(1899, 8.1, "Team Average", bty="n", lty=1, lwd=2.5, col="goldenrod1")
+
+# Add gridlines
+grid(NA, 9, lwd = 2)
+
+# X-axis customization
+axis(side=1, at=seq(1900, 2020, by=10 ), cex.axis=1, 
+     lwd=1, tck=-.01, mgp=c(0,0,0) )
+
+# Y-axis customization
+axis(side=4, at=seq(0, 10, by=1 ), las=1, cex.axis=1, 
+     col.axis=gray(.5), col="white" ) 
+
+# Text outside plot
+mtext("Strikeouts on the Rise ", 
+      side=3, line=2, adj=.01, cex=1.5, col="black")
+mtext("There were more strikeouts in 2012 than at any other time in major league history.", 
+      side=3, line=1, adj=.01, cex=1, col="black")
+
+# Text inside plot
+text(1899, 9, "Strikeouts per game per team (by batters) ", 
+     cex=1, col="black")
+text(c(1917, 2007), c(2, 4.7), 
+     labels=c("US\nenters\nWorld War 1", "Mitchell Report\non steriods"),
+     cex=.65, col=gray(.5))
+#text(5, 5, label=input$Select, cex=4)
+
+# Line segments referring text back to league average data point
+segments(1917, 2.5, 1917, 3.5, col=gray(.5))
+segments(2007, 4.9, 2007, 6.5, col=gray(.5))
+})
+```
+

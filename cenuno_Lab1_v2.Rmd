@@ -1,0 +1,59 @@
+---
+title: "Lab 01"
+author: "Cristian E. Nuno"
+date: "September 3, 2016"
+output: pdf_document
+---
+```{r, echo=F, warning=FALSE }
+# Load Necessary Packages and Data
+library( Lahman )
+data( Master )
+```
+
+
+## Question 1
+
+What is the average weight of an MLB player?
+
+Answer: Approximately 186 pounds.
+```{r}
+mean(Master$weight, na.rm=TRUE)
+```
+## Question 2
+
+How many MLB players have come from the Netherlands?
+
+Answer: 12
+```{r}
+a <- table( Master$birthCountry )
+a [names(a)=="Netherlands"]
+```
+## Question 3
+
+How tall was the tallest player in MLB? The shortest?
+
+Answer: The tallest player was 83 inches (nearly 7 feet) tall; meanwhile, the shortest player was 43 inches (shorter than 4 feet) tall.
+```{r}
+max(Master$height, na.rm=TRUE)
+min(Master$height, na.rm=TRUE)
+```
+## Question 4
+
+What percentage of players in MLB switch-hit?
+
+Answer: 6.59 perecent of players in MLB can switch-hit.
+```{r}
+tbl <- table(Master$bats)
+res <- cbind(tbl,round (prop.table(tbl) * 100, 2))
+colnames(res) <- c('Count', 'Percentage')
+res
+```
+## Question 5
+
+How many players are right-handed when they throw, but left-handed when they bat?
+
+Answer: 2054 players in MLB throw with their right-hand but are left-handed when they bat.
+```{r}
+table(Master$throws, Master$bats)
+```
+

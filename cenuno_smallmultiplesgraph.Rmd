@@ -1,0 +1,109 @@
+---
+title: "Quiz_02"
+author: "Cristian E. Nuno"
+date: "October 31, 2016"
+output: pdf_document
+---
+
+
+```{r echo=FALSE}
+# Load data
+dat <- read.csv("https://raw.githubusercontent.com/cenuno/MPA_Portfolio/lab_01/NhoodValPerAcreByDecade.csv", head=TRUE, sep=",")
+```
+
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.height=6, fig.width=9}
+### SMALL MULTIPLES EXAMPLE
+attach(dat)
+par( mfrow=c(2,2) )
+# add an outer margin and change inner margins
+par( oma=c(4,4,4,4), mar=c(2,3,2,1) )
+
+# Highlight Southside neighborhood
+plot(year, Southside, type="l", lwd=5, col="steelblue",
+     xaxt="n", yaxt="n",
+     ylim=c(0,210000),
+     xlim=c(1900, 2020),
+     xlab="", ylab="", bty="n",
+    main="Southside" )
+
+# Gray out other neighborhoods
+lines(year, Northside, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Strathmore, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Westcott, type="l", lwd=5, col=gray(0.5, 0.5))
+
+# Label start-and-end points
+points(year[1], Southside[1], pch=19, cex=2, col="steelblue")
+text( year[1], Southside[1], labels="$25,340", cex=1, pos=3, col="black")
+points(year[12],Southside[12], pch=19, cex=2, col="steelblue")
+text( year[12], Southside[12], labels="$16,291", cex=1, pos=3, col="black")
+
+# Highlight Strathmore neighborhood
+plot(year, Strathmore, type="l", lwd=5, col="steelblue",
+     xaxt="n", yaxt="n",
+     ylim=c(0,210000),
+     xlim=c(1900, 2020),
+     xlab="", ylab="", bty="n",
+    main="Strathmore" )
+
+# Gray out other neighborhoods
+lines(year, Northside, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Southside, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Westcott, type="l", lwd=5, col=gray(0.5, 0.5))
+
+# Label start-and-end points
+points(year[1], Strathmore[1], pch=19, cex=2, col="steelblue")
+text( year[1], Strathmore[1], labels="$76,904", cex=1, pos=3, col="black")
+points( year[11], Strathmore[11], pch=19, cex=2, col="steelblue")
+text( year[11], Strathmore[11], labels="$87,111", cex=1, pos=3, col="black")
+# Highlight Northside neighborhood
+plot(year, Northside, type="l", lwd=5, col="steelblue",
+     xaxt="n", yaxt="n",
+     ylim=c(0,210000),
+     xlim=c(1900, 2020),
+     xlab="", ylab="", bty="n",
+    main="Northside" )
+
+# X-axis customization
+axis(side=1, at=seq(1900, 2020, by=10 ), cex.axis=1, 
+     lwd=1, tck=-.01, mgp=c(0,0,0), col="white" )
+
+# Gray out other neighborhoods
+lines(year, Strathmore, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Southside, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Westcott, type="l", lwd=5, col=gray(0.5, 0.5))
+
+# Label start-and-end points
+points(year[1], Northside[1], pch=19, cex=2, col="steelblue")
+text( year[1], Northside[1], labels="$86,518", cex=1, pos=3, col="black")
+points( year[11], Northside[11], pch=19, cex=2, col="steelblue")
+text( year[11], Northside[11], labels="$91,759", cex=1, pos=3, col="black")
+
+# Highlight Westcott neighborhood
+plot(year, Westcott, type="l", lwd=5, col="steelblue",
+     xaxt="n", yaxt="n",
+     ylim=c(0,210000),
+     xlim=c(1900, 2020),
+     xlab="", ylab="", bty="n",
+    main="Westcott" )
+
+# X-axis customization
+axis(side=1, at=seq(1900, 2020, by=10 ), cex.axis=1, 
+     lwd=1, tck=-.01, mgp=c(0,0,0), col="white" )
+
+# Gray out other neighborhoods
+lines(year, Strathmore, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Southside, type="l", lwd=5, col=gray(0.5, 0.5))
+lines(year, Northside, type="l", lwd=5, col=gray(0.5, 0.5))
+
+# Label start-and-end points
+points(year[1], Westcott[1], pch=19, cex=2, col="steelblue")
+text( year[1], Westcott[1], labels="$86,624", cex=.80, pos=3, col="black")
+points( year[12], Westcott[12], pch=19, cex=2, col="steelblue")
+text( year[12], Westcott[12], labels="$120,868", cex=1, pos=3, col="black")
+
+# add text to the outer margin
+mtext( "Median Assessed Land Value per Acre over Time\nin Four Syracuse Neighborhoods",
+       side=3, outer=T, line=0, cex=1.75)
+```
+

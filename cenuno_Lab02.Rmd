@@ -1,0 +1,104 @@
+---
+title: "Lab_02"
+author: "Cristian E. Nuno"
+date: "September 13, 2016"
+output: html_document
+---
+```{r Load Required Packages and Data}
+library( pander )
+library( dplyr )
+dat <- read.csv( "https://raw.githubusercontent.com/lecy/maps-in-R/master/Data/syr_parcels.csv" )
+```
+
+## Question 1
+
+What is the total assessed value of all the taxable land in Syracuse?
+
+Answer: $ 7,538,424,950
+```{r}
+total.AV <- sum( dat$AssessedVa, na.rm=TRUE )
+paste( "$", format( total.AV, big.mark="," ), sep="" )
+```
+
+
+## Question 2
+
+What proportion of land parcels is not taxable? What is the value of these non-taxable parcels?
+
+Answer: The proportion of land parcels that is not taxable is approximately 12 percent of all parcels, but approxmiately 40 percent of all assessed parcels. The value of assessed non-taxable parcels is $3,006,860,002.
+```{r}
+# Proportion of land parecels that is not taxable
+nontaxparcels <- dat$LandUse == "Cemetery" | dat$LandUse == "Community Services" | 
+                 dat$LandUse == "Parking" | dat$LandUse == "Parks" | dat$LandUse == "Recreation" |
+                 dat$LandUse == "Religious" | dat$LandUse == "Schools" |
+                 dat$LandUse == "Utilities" | dat$LandUse == "Vacant Land"
+
+# Sum of these nontaxable parcels
+sum( nontaxparcels )
+
+# Identifying taxable parcels
+taxparcels <- ! nontaxparcels
+
+# Calculating proportion of nontaxable parcels
+propnontax <- sum( nontaxparcels ) / sum( nontaxparcels, taxparcels)
+paste(round(100*propnontax, 2), "%", sep="")
+
+# Value of assessed nontaxable parcels
+Value <- sum( dat$AssessedVa [ nontaxparcels ] )
+paste( "$", format( Value, big.mark="," ), sep="" )
+
+# Calculating proportion of assessed nontaxable parcels
+Proportion <- Value / sum( dat$AssessedVa )
+paste( round(100*Proportion, 2), "%", sep="" )
+```
+
+
+## Question 3
+
+Which property has the highest delinquent tax bill?
+
+Answer: The James M. Hanley Federal Building, owned by the U.S. federal government, is the property with the highest delinquent. The total amount of the delinquient tax bill was $1,543,354.
+```{r}
+max.del.tbill <- which.max( dat$AmtDelinqu )
+dat[ max.del.tbill, ] %>% pander
+```
+
+
+## Question 4
+
+Which neighborhoods have the highest proportion of vacant buildings?
+
+Answer:
+
+1.  Brighton at 11%.
+
+2.  Near Westside & Prospect Hill at 10%.
+
+3.  Elmwood & Southside at 9%.
+
+4.  Northside & Southwest at 8%.
+
+```{r}
+table( dat$Nhood, dat$VacantBuil ) %>% prop.table( margin=1 ) %>% round( 2 ) %>% pander
+```
+
+
+## Question 5
+
+How many single family homes worth more than $100,000 each are located in each of the neighborhoods above?
+
+Answer:
+
+*  Brighton has 0.
+
+*  Near Westside & Prospect HIll each have 1.
+
+*  Elmwood has 6. Southside has 0.
+
+*  Northside has 5. Southwest has 0.
+```{r}
+# Produce a table of all neighborhoods
+these.single.fam.100k <- dat$LandUse == "Single Family" & dat$AssessedVa > 100000
+table( dat$Nhood, these.single.fam.100k ) %>% pander
+```
+

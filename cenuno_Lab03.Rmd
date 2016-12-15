@@ -1,0 +1,99 @@
+---
+title: "Lab 03"
+author: "Cristian E. Nuno"
+date: "September 19, 2016"
+output: html_document
+---
+```{r results='hide', message=FALSE}
+# Load Necessary Packages and Data
+library( Lahman )
+data( Master )
+data( Teams )
+data( Salaries )
+data( HallOfFame )
+data( Schools )
+data( CollegePlaying )
+
+# For table formatting purposes
+library( pander )
+library( plyr )
+library( dplyr )
+```
+
+
+## Question 1
+
+What is the average salary of a player on the Oakland A’s in 2002? A player on the Boston Red Sox that same year? What is the total budget of each franchise in 2002? 
+
+Answer: The median salary of a player on the Oakland A's in 2002 was $812,500; meanwhile, the total budget of the team was just over $40 million dollars. For the same year, the median salary of a player on the Boston Red Sox was $2,287,500; however, their total budget was over $100 million. 
+
+```{r}
+# Identify shared variable names between the two datasets
+intersect( names( Teams ), names( Salaries ) )
+
+
+# Merge the "Teams" and "Salaries" datasets
+trial <- merge( Teams, Salaries, by.x=c( "teamID", 
+                                         "yearID", 
+                                         "lgID" ), 
+                                 by.y=c( "teamID", 
+                                         "yearID", 
+                                         "lgID" )
+                )
+
+
+# Median salary in 2002 of Oakland A's players
+oak <-  trial[ trial$teamID == "OAK" & trial$yearID == 2002, ]
+os <- median( oak$salary )
+paste( "Median 2002 Oakland A's Salary = $", format( os, big.mark="," ) , sep="" )
+
+# Total budget Oakland A's in 2002
+
+tos <- sum( oak$salary )
+paste( "Total 2002 budget for Oakland A's = $", format( tos, big.mark="," ) , sep="" )
+
+# Median salary in 2002 of Boston Red Sox players
+bss <-  trial[ trial$teamID == "BOS" & trial$yearID == 2002, ]
+bs <- median( bss$salary )
+paste( "Median 2002 Boston Red Sox Salary = $", format( bs, big.mark="," ) , sep="" )
+
+# Total budget Boston Red Sox in 2002
+tbs <- sum( bss$salary )
+paste( "Total 2002 budget for Boston Red Sox = $", format( tbs, big.mark="," ) , sep="" )
+```
+
+## Question 2
+
+Which city (birth city) has produced the most baseball hall-of-famers? Use the Master and HallOfFame datasets.
+
+Answer: Chicago has produced the most baseball hall-of-famers at 9 as of today.
+```{r}
+intersect( names(HallOfFame), names(Master) )
+HOF.Cities <- merge( HallOfFame, Master, by.x="playerID", by.y="playerID" )
+hofwinners <- HOF.Cities[ HOF.Cities$inducted == "Y", ]
+which.max( table( hofwinners$birthCity ) )
+table( hofwinners$birthCity ) [45]
+```
+
+## Question 3
+
+How many players went to college in Los Angeles, San Diego, or San Francisco? Use the CollegePlaying and the Schools datasets.
+
+Answer: 347 players went to college in either Los Angeles, San Diego, or San Francisco.
+```{r}
+dat.schools <- merge( CollegePlaying, Schools )
+head( dat.schools )
+head( sort( table( dat.schools$city ), decreasing=T ) )
+
+dat.schools <- dat.schools[ , c("playerID","name_full","city") ]
+nrow( dat.schools )
+
+dat.schools <- unique( dat.schools )
+nrow( dat.schools )
+
+head( sort( table( dat.schools$city ), decreasing=T ) )
+sum( dat.schools$city == "Los Angeles" |
+     dat.schools$city == "San Diego" |
+     dat.schools$city == "San Francisco" )
+```
+

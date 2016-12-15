@@ -83,7 +83,7 @@ text( year[11], Northside[11], labels="$91,759", cex=1, pos=3, col="black")
 plot(year, Westcott, type="l", lwd=5, col="steelblue",
      xaxt="n", yaxt="n",
      ylim=c(0,210000),
-     xlim=c(1900, 2020),
+     xlim=c(1900, 2025),
      xlab="", ylab="", bty="n",
     main="Westcott" )
 
@@ -98,7 +98,7 @@ lines(year, Northside, type="l", lwd=5, col=gray(0.5, 0.5))
 
 # Label start-and-end points
 points(year[1], Westcott[1], pch=19, cex=2, col="steelblue")
-text( year[1], Westcott[1], labels="$86,624", cex=.80, pos=3, col="black")
+text( year[1], Westcott[1], labels="$86,624", cex=1, pos=3, col="black")
 points( year[12], Westcott[12], pch=19, cex=2, col="steelblue")
 text( year[12], Westcott[12], labels="$120,868", cex=1, pos=3, col="black")
 

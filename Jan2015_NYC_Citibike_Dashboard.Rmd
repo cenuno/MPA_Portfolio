@@ -29,6 +29,8 @@ library(DT)
 
 
 ```{r} 
+#building data set - Stephanie
+
 starttime.character <- as.character(dat$starttime)
 subStartTime<-substr(starttime.character, start=10, stop=15)
 
@@ -84,6 +86,8 @@ sixty.time <- as.data.frame(summarise( sixty_grp , riders.at.time = n()) )
 ```
 
 ```{r} 
+## data- Linnea pie chart
+
 dat.stationgender<-select(dat,start.station.name, gender)
 sgtab <- table(dat.stationgender)
 sgdf <- as.data.frame(sgtab)
@@ -91,14 +95,14 @@ lbls <- c("Unspecified", "Male", "Female")
 ```
 
 
-```{r Heat Map Frequency by Age, echo=FALSE}
+```{r Heat Map Frequency by Age, DATA - Steph, echo=FALSE}
 # Heat Map - Station frequency by age
 dat.with.age <- mutate( dat , age = 2016 - birth.year )
 dat.with.agebrackets <- mutate( dat.with.age , agegrp = ifelse( age < 20 , "Teenager" , ifelse( age >= 20 & age <30 , "Twenties", ifelse( age >= 30 & age < 40 , "Thirties" , ifelse( age >= 40 & age < 50 , "Forties" , ifelse(age >= 50 & age < 60 , "Fifties", ifelse( age >= 60 , "Sixty Plus" , NA) ) ) ) ) ) )
 ```
 
 
-```{r, echo=FALSE}
+```{r Cristian's Dumbbell Plots, echo=FALSE}
 
 NYCB <- tbl_df( dat )
 

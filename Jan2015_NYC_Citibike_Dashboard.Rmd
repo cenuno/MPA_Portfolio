@@ -118,8 +118,8 @@ distance <- round(distGeo(start.LA.LO, end.LA.LO,
 # Speed is measured in minutes. Round to the nearest 100th.
 speed <- round((stoptime_num - starttime_num)*100, 2)
 
-# Calculate age as the difference between the current year (2016) and the birth year
-age.dat <- 2016 - NYCB$birth.year
+# Calculate age as the difference between the dataset year (2015) and the birth year
+age.dat <- 2015 - NYCB$birth.year
 
 # Add these new variables into a new dataframe
 NYCB <- mutate( dat , starttime_num = starttime_num , stoptime_num = stoptime_num, 

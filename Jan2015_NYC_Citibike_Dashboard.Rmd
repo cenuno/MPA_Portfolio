@@ -29,7 +29,6 @@ library(DT)
 
 
 ```{r} 
-#building data set - Stephanie
 
 starttime.character <- as.character(dat$starttime)
 subStartTime<-substr(starttime.character, start=10, stop=15)
@@ -86,8 +85,6 @@ sixty.time <- as.data.frame(summarise( sixty_grp , riders.at.time = n()) )
 ```
 
 ```{r} 
-## data- Linnea pie chart
-
 dat.stationgender<-select(dat,start.station.name, gender)
 sgtab <- table(dat.stationgender)
 sgdf <- as.data.frame(sgtab)
@@ -95,14 +92,14 @@ lbls <- c("Unspecified", "Male", "Female")
 ```
 
 
-```{r Heat Map Frequency by Age, DATA - Steph, echo=FALSE}
+```{r age groups, echo=FALSE}
 # Heat Map - Station frequency by age
 dat.with.age <- mutate( dat , age = 2016 - birth.year )
 dat.with.agebrackets <- mutate( dat.with.age , agegrp = ifelse( age < 20 , "Teenager" , ifelse( age >= 20 & age <30 , "Twenties", ifelse( age >= 30 & age < 40 , "Thirties" , ifelse( age >= 40 & age < 50 , "Forties" , ifelse(age >= 50 & age < 60 , "Fifties", ifelse( age >= 60 , "Sixty Plus" , NA) ) ) ) ) ) )
 ```
 
 
-```{r Cristian's Dumbbell Plots, echo=FALSE}
+```{r Dumbbell Plots, echo=FALSE}
 
 NYCB <- tbl_df( dat )
 
@@ -483,7 +480,10 @@ Row
 ### Distance-Age-Duration
 
 ```{r}
-scatterplot3d( x = NYCB$tripduration, y = NYCB$age, z = NYCB$distance, color="darkorchid3", main= "Distance vs. Age vs. Duration", xlab="Trip Duration", ylab="Age", zlab="Distance", cex.axis=.6, grid=T )
+scatterplot3d( x = NYCB$tripduration, y = NYCB$age, z = NYCB$distance,
+               color="violetred4", main= "Distance vs. Age vs. Duration", 
+               xlab="Trip Duration", ylab="Age", zlab="Distance", 
+               cex.axis=.6, grid=T )
 ```
 
 
@@ -499,13 +499,18 @@ five.start.station <- as.data.frame( head( dat.start.station, n=5L ) )
 
 plot.new()
 
-lower="Customers/Subscribers"
-upper="Stations"
-bp<-barplot(five.start.station$n, beside = TRUE, horiz = TRUE, border=NA, names="", col="palegreen3")
-title(main="Top 5 Frequently Used Start Stations")
-title(xlab="Customers/Subscribers", col="palegreen3")
-title(ylab="Start Stations")
-text(bp, lab=c("8 Ave & W ","Lafayette St & E", "E 43 St & Vanderbilt", "W 21 St & 6 Ave", "8 Ave & W 33 St" ), pos=4)
+lower = "Customers/Subscribers"
+upper = "Stations"
+bp <- barplot( five.start.station$n, beside = TRUE, 
+               horiz = TRUE, border=NA, names="", col="palegreen3")
+
+title( main = "Top 5 Frequently Used Start Stations")
+title( xlab ="Customers/Subscribers", 
+       col  = "palegreen3")
+title( ylab = "Start Stations")
+text( bp, lab = c("8 Ave & W ","Lafayette St & E", "E 43 St & Vanderbilt", 
+                  "W 21 St & 6 Ave", "8 Ave & W 33 St" ), 
+      pos=4)
 
 ```
 
@@ -546,7 +551,7 @@ City Bike Map - NYC {data-icon="fa-map"}
 ### Heat Map of Frequency by Age and Day of Week {data-height=910}
     
 
-```{r Heat Map Frequency by Age - Steph, echo=FALSE}
+```{r Heat Map Frequency by Age, echo=FALSE}
 
 dat.with.age <- mutate( dat , age = 2016 - birth.year )
 dat.with.agebrackets <- mutate( dat.with.age , agegrp = ifelse( age < 20 , "Teenager" , ifelse( age >= 20 & age <30 , "Twenties", ifelse( age >= 30 & age < 40 , "Thirties" , ifelse( age >= 40 & age < 50 , "Forties" , ifelse(age >= 50 & age < 60 , "Fifties", ifelse( age >= 60 , "Sixty Plus" , NA) ) ) ) ) ) )

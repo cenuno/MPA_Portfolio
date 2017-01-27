@@ -1,18 +1,9 @@
 # 
-# Author: Cristian Nuno
-# Purpose: Demonstrate the Confidence Interval of Slopes
-# Date: January 26, 2017
-#
-
-# Confidence Interval of Classroom Size on Test Scores
+# Author:         Cristian Nuno
+# Date:           January 26, 2017
+# Title:          Confidence Interval of Classroom Size on Test Scores
 # Source of Data: PAI 722 Homework 2 Linear Regression Output
-
-points( x = c(-0.38393:-0.37608), y = c(0,0), 
-        pch = 19, col = "firebrick", 
-        type = "l", lwd = 5)  # model 2
-points( x = c( -0.47108, 0.20708 ), y = c(0, 0), 
-        pch = 19, col = "firebrick", 
-        type = "l", lwd = 5)  # model 4
+#
 
 # Classroom size slope
 class.size <- c(-0.378, -0.380, -0.132)
@@ -34,8 +25,8 @@ plot( slope, n.trials,
       type = "n" )
 
 # Label Y axis
-mtext( "Infinity", side = 2, line = 1, adj = 1  )
-mtext( "0",        side = 2, line = 1, adj = .01)
+mtext( "Infinity", side = 2, line = 1, adj = 1, cex = 0.8  )
+mtext( "0",        side = 2, line = 1, adj = .01, cex = 0.8 )
 
 # Add Estimated Slope (Beta 1) value for each model
 abline( v = class.size[ 1 ], lwd = 2, col = "dodgerblue4" ) # model 1 slope (solid)
@@ -54,7 +45,7 @@ text( x = c(ci.left[1], ci.right[1]), y = c(0,0),
 # Add Legend
 legend( x = 0.2, y = 0.5,
         cex = 1,
-        legend = c("No Impact", "Slope", "Confidence\nInterval"),
+        legend = c("No Impact", "Slope = -0.378", "Confidence\nInterval"),
         bty = "n", lty = c(2, 1, 4), 
         lwd = c(1, 1, 1), 
         col = c("black", "dodgerblue4", "firebrick")
@@ -70,8 +61,8 @@ plot( slope, n.trials,
       type = "n" )
 
 # Label Y axis
-mtext( "Infinity", side = 2, line = 1, adj = 1  )
-mtext( "0",        side = 2, line = 1, adj = .01)
+mtext( "Infinity", side = 2, line = 1, adj = 1, cex = 0.8  )
+mtext( "0",        side = 2, line = 1, adj = .01, cex = 0.8 )
 
 # Add Estimated Slope (Beta 1) value for each model
 abline( v = class.size[ 2 ], lwd = 2, col = "dodgerblue4" ) # model 1 slope (solid)
@@ -90,7 +81,7 @@ text( x = c(ci.left[2], ci.right[2]), y = c(0,0),
 # Add Legend
 legend( x = 0.2, y = 0.5,
         cex = 1,
-        legend = c("No Impact", "Slope", "Confidence\nInterval"),
+        legend = c("No Impact", "Slope = -0.380", "Confidence\nInterval"),
         bty = "n", lty = c(2, 1, 4), 
         lwd = c(1, 1, 1), 
         col = c("black", "dodgerblue4", "firebrick")
@@ -105,8 +96,8 @@ plot( slope, n.trials,
       type = "n" )
 
 # Label Y axis
-mtext( "Infinity", side = 2, line = 1, adj = 1  )
-mtext( "0",        side = 2, line = 1, adj = .01)
+mtext( "Infinity", side = 2, line = 1, adj = 1, cex = 0.8  )
+mtext( "0",        side = 2, line = 1, adj = .01, cex = 0.8 )
 
 # Add Estimated Slope (Beta 1) value for each model
 abline( v = class.size[ 3 ], lwd = 2, col = "dodgerblue4" ) # model 1 slope (solid)
@@ -125,7 +116,7 @@ text( x = c(ci.left[3], ci.right[3]), y = c(0,0),
 # Add Legend
 legend( x = 0.2, y = 0.5,
         cex = 1,
-        legend = c("No Impact", "Slope", "Confidence\nInterval"),
+        legend = c("No Impact", "Slope = -0.132", "Confidence\nInterval"),
         bty = "n", lty = c(2, 1, 4), 
         lwd = c(1, 1, 1), 
         col = c("black", "dodgerblue4", "firebrick")

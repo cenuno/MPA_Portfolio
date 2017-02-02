@@ -1,0 +1,447 @@
+---
+title: "City of Cincinnati Citizen Complaints Visualizations"
+author: "Cristian E. Nuno"
+date: "1/31/2017"
+output: html_document
+---
+```{r, Load Data, echo=FALSE, message=FALSE, fig.height=6, fig.width=9}
+# Load Data
+library( dplyr )
+ccc_url <- "https://data.cincinnati-oh.gov/api/views/r3vg-n6p3/rows.csv?accessType=DOWNLOAD"
+ccc <- read.csv( ccc_url, stringsAsFactors = FALSE)
+
+# Convert Date.Received class from character to date class
+ccc$Date.Received <- as.Date( ccc$Date.Received, format = "%m/%d/%Y")
+
+# Aggregate by year and by month
+# Plot aggregate total citizen complaints over time
+year.month.all <- format( ccc$Date.Received, 
+                      format = "%Y-%m" )
+
+# Create quartiles from frequency of complaints
+# 3rd quartile value is 14
+quantiles.freq <- as.data.frame( quantile( 
+                                  table( year.month.all ) 
+                                  ) 
+                                 )
+# Select and color those frequencies which are above the 75th quartile
+# (FALSE + 1 -> 1 -> "blue";    TRUE + 1 -> 2 -> "red")
+above.75th <- c( "#002673", "#C70F2E")[ ( table( year.month.all ) > quantiles.freq$Freq[ 4 ] ) + 1 ]
+
+# Variables that may come in handy later
+as.month <- format( ccc$Date.Received, format = "%b")
+month.order <- c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+as.month <- factor( as.month, ordered = TRUE, levels = month.order )
+as.year <- format( ccc$Date.Received, format = "%Y" )
+ccc$Year <- as.year
+ccc$Month <- as.month
+
+# Aggregated complaints by neighborhood
+n.count <- as.data.frame( table( ccc$Neighborhood ) )
+colnames( n.count ) <- c("Neighborhood", "Freq")
+
+# Determine values that are above the 3rd Quartile;
+# 3rd Quartile = specific value where 75% of values fall below that specified value
+
+# 18.25 is our value
+#quantile( n.count$Freq ) 
+# Identify neighborhoods who have complaints over 18.25
+high.n.count <- which( n.count$Freq > 18.25 ) 
+# List these 12 neighborhoods
+# as.character( n.count$Neighborhood[ high.n.count ] )
+
+```
+
+```{r Plot Total Number of Complaints, echo=FALSE, message=FALSE}
+
+# Plot Total Complaints Over Time
+plot( table( year.month.all ), lty=1, lwd=5, las=2, cex.axis=0.8, 
+      col = above.75th, 
+      #main = "Total Number of Citizen Complaints\nAgainst Cincinnati #Police Officers, 2010-2015", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+
+# X-axis customization
+axis(side=1, at=seq(6, 66, by=12 ),
+     labels = c("2010", "2011", "2012", "2013", "2014", "2015"),
+     cex.axis=1, 
+     lwd=1, mgp=c(0,0,0), col.ticks = "white", 
+     col.axis = gray(0.5), col = "white" )
+
+# Y-axis customization
+axis(side=2, at=seq(0, 50, by=10 ), las=1, cex.axis=1, 
+     col.axis=gray(.5), col="white" )
+
+# Add legend
+legend( "topleft", legend = c("More than 14 Complaints per Month", "Less than 14 Complaints per Month"),
+        bty = "n", lty = 1, lwd = 5, 
+        col = c( "#C70F2E", "#002673" ) )
+# Add vertical lines to separate the years
+abline( v = 12, lty = 2, col = "gray") # 2010
+abline( v = 24, lty = 2, col = "gray") # 2011
+abline( v = 36, lty = 2, col = "gray") # 2012
+abline( v = 48, lty = 2, col = "gray") # 2013
+abline( v = 60, lty = 2, col = "gray") # 2014
+
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "Monthly Complaints Filed by Citizens Against\nCincinnati Police Officers, 2010-2015")
+
+# Add date created, who made it, and data source
+mtext( side = 1, line = 2, adj = 1, cex = 0.5, 
+       text = "Date Created: 02/01/2017")
+
+mtext( side = 1, line = 2.5, adj = 1, cex = 0.5,
+       text = "Created By: Cristian E. Nuno")
+
+mtext( side = 1, line = 3, adj = 1, cex = 0.5, 
+       text = "Date Source: https://data.cincinnati-oh.gov/Safer-Streets/Citizen-Complaints/r3vg-n6p3/data")
+
+```
+
+```{r Create Visuals, echo=FALSE, message=FALSE, fig.height=6, fig.width=9}
+# Filter data by year, resulting in 6 filtered datasets
+year.2010 <- filter( ccc, Date.Received >= "2010-01-01" & Date.Received <= "2010-12-31" )
+year.2011 <- filter( ccc, Date.Received >= "2011-01-01" & Date.Received <= "2011-12-31" )
+year.2012 <- filter( ccc, Date.Received >= "2012-01-01" & Date.Received <= "2012-12-31" )
+year.2013 <- filter( ccc, Date.Received >= "2013-01-01" & Date.Received <= "2013-12-31" )
+year.2014 <- filter( ccc, Date.Received >= "2014-01-01" & Date.Received <= "2014-12-31" )
+year.2015 <- filter( ccc, Date.Received >= "2015-01-01" & Date.Received <= "2015-12-31" )
+
+# Arrange filtered datasets by the year and month
+year.month.2010 <- format( year.2010$Date.Received, format = "%Y-%m" )
+year.month.2011 <- format( year.2011$Date.Received, format = "%Y-%m" )
+year.month.2012 <- format( year.2012$Date.Received, format = "%Y-%m" )
+year.month.2013 <- format( year.2013$Date.Received, format = "%Y-%m" )
+year.month.2014 <- format( year.2014$Date.Received, format = "%Y-%m" )
+year.month.2015 <- format( year.2015$Date.Received, format = "%Y-%m" )
+
+# Plot Prototype
+# Clear scaling issues
+# Need to scale each graph on a similar plot (total for all)
+y.max <- max( table( year.month.all ) )
+month.labels <- c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+par( mfrow = c(2, 3), oma = c(3.5, 0, 4, 0) ) # arrange plots on one space, 2 x 3
+# Plot 2010 all data
+plot( table( year.month.2010 ), ylim = c( 0, y.max), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, cex.axis = 1, lwd = 1, mgp = c(0,0,1), col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max, by=10 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2010")
+
+# Plot 2011 all data
+plot( table( year.month.2011 ), ylim = c( 0, y.max), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, cex.axis = 1, lwd = 1, mgp = c(0,0,1), col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max, by=10 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2011")
+
+# Plot 2012 all data
+plot( table( year.month.2012 ), ylim = c( 0, y.max), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, cex.axis = 1, lwd = 1, mgp = c(0,0,1), col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max, by=10 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2012")
+
+# Plot 2013 all data
+plot( table( year.month.2013 ), ylim = c( 0, y.max), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, cex.axis = 1, lwd = 1, mgp = c(0,0,1), col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max, by=10 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2013")
+
+# Plot 2014 all data
+plot( table( year.month.2014 ), ylim = c( 0, y.max), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, cex.axis = 1, lwd = 1, mgp = c(0,0,1), col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max, by=10 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2014")
+
+# Plot 2015 all data
+plot( table( year.month.2015 ), ylim = c( 0, y.max), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, cex.axis = 1, lwd = 1, mgp = c(0,0,1), col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max, by=10 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2015")
+
+# Title the entire multiplot
+mtext( text = ("Monthly Complaints Filed Against\nCincinnati Police Officers, 2010-2015"), outer = TRUE, cex = 1.2 )
+
+# Add date created, who made it, and data source
+mtext( outer = TRUE, cex = 0.6, adj = 0.98, 
+       line = 0.25, side = 1,
+       text = "Date Created: 02/01/2017")
+
+mtext( outer = TRUE, cex = 0.6, adj = 0.98,
+       line = 1, side = 1,
+       text = "Created By: Cristian E. Nuno")
+
+mtext( outer = TRUE, cex = 0.6, adj = 0.98, 
+       line = 1.75, side = 1,
+       text = "Date Source: https://data.cincinnati-oh.gov/Safer-Streets/Citizen-Complaints/r3vg-n6p3/data")
+
+```
+
+```{r Avondale, echo=FALSE, message=FALSE, fig.height=6, fig.width=9}
+# Now let's do the same thing except for one particular neighborhood
+
+year.all.avondale <- filter( ccc, Date.Received >= "2010-01-01" &
+                               Date.Received <= "2015-12-31" &
+                               Neighborhood == "Avondale")
+
+year.2010.avondale <- filter( ccc, Date.Received >= "2010-01-01" &
+                                Date.Received <= "2010-12-31" & 
+                                Neighborhood == "Avondale" )
+year.2011.avondale <- filter( ccc, Date.Received >= "2011-01-01" &
+                       Date.Received <= "2011-12-31" &
+                       Neighborhood == "Avondale" )
+year.2012.avondale <- filter( ccc, Date.Received >= "2012-01-01" &
+                       Date.Received <= "2012-12-31" &
+                       Neighborhood == "Avondale" )
+year.2013.avondale <- filter( ccc, Date.Received >= "2013-01-01" &
+                       Date.Received <= "2013-12-31" &
+                       Neighborhood == "Avondale" )
+year.2014.avondale <- filter( ccc, Date.Received >= "2014-01-01" &
+                       Date.Received <= "2014-12-31" &
+                       Neighborhood == "Avondale" )
+year.2015.avondale <- filter( ccc, Date.Received >= "2015-01-01" &
+                       Date.Received <= "2015-12-31" &
+                       Neighborhood == "Avondale")
+
+# Arrange filtered datasets by the year and month
+year.month.avondale <- format( year.all.avondale$Date.Received,
+                               format = "%Y-%m")
+
+year.month.2010.avondale <- format( year.2010.avondale$Date.Received,
+                                    format = "%Y-%m" )
+year.month.2011.avondale <- format( year.2011.avondale$Date.Received,
+                                    format = "%Y-%m" )
+year.month.2012.avondale <- format( year.2012.avondale$Date.Received,
+                                    format = "%Y-%m" )
+year.month.2013.avondale <- format( year.2013.avondale$Date.Received, 
+                                    format = "%Y-%m" )
+year.month.2014.avondale <- format( year.2014.avondale$Date.Received, 
+                                    format = "%Y-%m" )
+year.month.2015.avondale <- format( year.2015.avondale$Date.Received, 
+                                    format = "%Y-%m" )
+
+# Plot Prototype
+# Clear scaling issues
+# Need to scale each graph on a similar plot (total for Avondale neighborhood)
+# Need to make sure each month is accounted for, even when the instance is 0.
+y.max.avondale <- max( table( year.month.avondale ) )
+levels.2010 = c( "2010-01", "2010-02", "2010-03", "2010-04", 
+                 "2010-05", "2010-06", "2010-07", "2010-08", 
+                 "2010-09", "2010-10", "2010-11", "2010-12")
+
+levels.2011 = c( "2011-01", "2011-02", "2011-03", "2011-04", 
+                 "2011-05", "2011-06", "2011-07", "2011-08", 
+                 "2011-09", "2011-10", "2011-11", "2011-12")
+
+levels.2012 = c( "2012-01", "2012-02", "2012-03", "2012-04", 
+                 "2012-05", "2012-06", "2012-07", "2012-08", 
+                 "2012-09", "2012-10", "2012-11", "2012-12")
+
+levels.2013 = c( "2013-01", "2013-02", "2013-03", "2013-04", 
+                 "2013-05", "2013-06", "2013-07", "2013-08", 
+                 "2013-09", "2013-10", "2013-11", "2013-12")
+
+levels.2014 = c( "2014-01", "2014-02", "2014-03", "2014-04", 
+                 "2014-05", "2014-06", "2014-07", "2014-08", 
+                 "2014-09", "2014-10", "2014-11", "2014-12")
+
+levels.2015 = c( "2015-01", "2015-02", "2015-03", "2015-04", 
+                 "2015-05", "2015-06", "2015-07", "2015-08", 
+                 "2015-09", "2015-10", "2015-11", "2015-12")
+
+# arrange plots on one space, 2 x 3
+par( mfrow = c(2, 3), oma = c(3.5, 0, 4, 0) ) 
+
+# Plot 2010 all data
+plot( table( factor( year.month.2010.avondale, levels = levels.2010 ) ), 
+      ylim = c( 0, y.max.avondale), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, 
+      cex.axis = 1, lwd = 1, mgp = c(0,0,1), 
+      col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max.avondale, by=5 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2010")
+
+# Plot 2011 all data
+plot( table( factor( year.month.2011.avondale, levels = levels.2011 ) ), 
+      ylim = c( 0, y.max.avondale), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, 
+      cex.axis = 1, lwd = 1, mgp = c(0,0,1), 
+      col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max.avondale, by=5 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2011")
+
+# Plot 2012 all data
+plot( table( factor( year.month.2012.avondale, levels = levels.2012 ) ), 
+      ylim = c( 0, y.max.avondale), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, 
+      cex.axis = 1, lwd = 1, mgp = c(0,0,1), 
+      col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max.avondale, by=5 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2012")
+
+# Plot 2013 all data
+plot( table( factor( year.month.2013.avondale, levels = levels.2013 ) ), 
+      ylim = c( 0, y.max.avondale), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, 
+      cex.axis = 1, lwd = 1, mgp = c(0,0,1), 
+      col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max.avondale, by=5 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2013")
+
+# Plot 2014 all data
+plot( table( factor( year.month.2014.avondale, levels = levels.2014 ) ), 
+      ylim = c( 0, y.max.avondale), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, 
+      cex.axis = 1, lwd = 1, mgp = c(0,0,1), 
+      col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max.avondale, by=5 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2014")
+
+# Plot 2015 all data
+plot( table( factor( year.month.2015.avondale, levels = levels.2015 ) ), 
+      ylim = c( 0, y.max.avondale), 
+      lty = 1, lwd = 5, cex.axis = 0.8, 
+      col = "#002673", 
+      ylab = "", yaxt = "n",
+      xlab = "", xaxt = "n" )
+# Add x-axis
+axis( side = 1, at=seq(1, 12, by=1), labels = month.labels, 
+      cex.axis = 1, lwd = 1, mgp = c(0,0,1), 
+      col.ticks = "white", col.axis = gray(0.5), col = "white")
+# Add y-axis
+axis(side=2, at=seq(0, y.max.avondale, by=5 ), 
+     las=1, cex.axis=1,
+     col.axis=gray(.5), col="white" )
+# Add title
+mtext( side = 3, line = 1, cex = 1.2, adj = 0.5,
+       text = "2015")
+
+# Title the entire multiplot
+n.name <- unique( year.all.avondale$Neighborhood )
+n.name <- paste( n.name, "Monthly Complaints Filed Against\nCincinnati Police Officers, 2010-2015", sep = " " )
+mtext( text = n.name, outer = TRUE, cex = 1.2 )
+
+# Add date created, who made it, and data source
+mtext( outer = TRUE, cex = 0.6, adj = 0.98, 
+       line = 0.25, side = 1,
+       text = "Date Created: 02/01/2017")
+
+mtext( outer = TRUE, cex = 0.6, adj = 0.98,
+       line = 1, side = 1,
+       text = "Created By: Cristian E. Nuno")
+
+mtext( outer = TRUE, cex = 0.6, adj = 0.98, 
+       line = 1.75, side = 1,
+       text = "Date Source: https://data.cincinnati-oh.gov/Safer-Streets/Citizen-Complaints/r3vg-n6p3/data")
+
+```

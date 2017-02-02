@@ -3,9 +3,8 @@ output: html_document
 runtime: shiny
 ---
 ---
-title: "Visualizing City of Cincinnati Monthly Citizen Complaints Against Police Officers "
-author: "Cristian E. Nuno"
-date: "2/1/2017"
+title: "Cristian E. Nuno"
+date: "2/2/2017"
 runtime: shiny
 output: html_document
 ---
@@ -58,15 +57,12 @@ month.labels <- c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP",
 
 ```
 
-## The monthly complaints filed by citizens against the City of Cincinnati police officers database was recently made publicly available:
+##### The monthly complaints filed by citizens against the City of Cincinnati police officers database was recently made publicly available:
 https://data.cincinnati-oh.gov/Safer-Streets/Citizen-Complaints/r3vg-n6p3/data.
 
-### At a glance, click below for the total monthly complaints for all of Cincinnati from 2010 to 2015:
-https://github.com/cenuno/MPA_Portfolio/blob/lab_01/cenuno_Cin_Citz_Complaints_3.pdf
+![](https://github.com/cenuno/MPA_Portfolio/raw/lab_01/cenuno_Cin_Citz_Complaints_3.png)
 
-
-
-## Below is an interactive tool which visualizes how many monthly complaints were filed in their neighborhood from 2010 to 2015.
+##### Below is an interactive tool which visualizes how many monthly complaints were filed in their neighborhood from 2010 to 2015.
 
 ```{r, echo = FALSE}
 # Now we are going to create an interactive visual
@@ -92,7 +88,7 @@ selectInput( inputId = "neighborhood",
           )
 
 
-renderPlot({
+renderPlot( {
 # Plot user input neighborhood
 # Filter data by neighborhood the user selects, resulting in 7 filtered datasets
 user.year.all <-  filter( ccc, Date.Received >= "2010-01-01" &
@@ -310,28 +306,47 @@ mtext( outer = TRUE, cex = 0.6, adj = 0.98,
        line = 1.75, side = 1,
        text = "Date Source: https://data.cincinnati-oh.gov/Safer-Streets/Citizen-Complaints/r3vg-n6p3/data")
 
-})
+}, 
+width = 900, height = 500
+)
 
 ```
-### Here are summary statistics regarding each neighborhood's total number of monthly complaints, 2010-2015:
+
+##### Here is each neighborhood's total number of monthly complaints, 2010-2015:
 
 ```{r, echo = FALSE, message = FALSE}
 library( pander )
-pander( table( ccc$Neighborhood ))
+
+table.caption <- "12 neighborhoods filed more than 18 complaints from 2010-2015: Avondale, Central Business Section, 
+Clifton-University Heights, Corryville, East Price Hill, Evanston, Over-The-Rhine, Walnut Hills, 
+West End, West Price Hill, Westwood, Winston Hills. 18 is the number of complaints which separates the top 25% 
+of neighborhoods that file the most complaints from all others."
+
+n.count.year <- as.matrix( table( ccc$Neighborhood, ccc$Year ) )
+total.count <- as.data.frame( table( ccc$Neighborhood ))
+colnames( total.count ) <- c("Neighborhood", "Total")
+n.count.year <- cbind( n.count.year, total.count$Total )
+colnames( n.count.year ) <- c("2010", "2011", "2012", "2013", "2014", "2015", "Total" )
+
+# Neighborhood complaints by year
+pandoc.table( n.count.year, 
+              plain.ascii = TRUE,
+              #emphasize.strong.rows = which( n.count$Freq > 18.25 ),
+              caption = table.caption
+              )
+
 ```
 
-###These are the 12 neighborhoods that filed more than 18 complaints from 2010-2015:
-##### *18 is the total number of complaints which splits off the highest 25% of data from the lowest 75%.*
+##### Total complaints through the years
+```{r echo = FALSE, message = FALSE}
+# Total complaints by year
+sum.year <- as.matrix( t( table( ccc$Year )) )
+sum.year.total <- sum( t( table( ccc$Year)))
+sum.year <- cbind( sum.year, sum.year.total )
+colnames( sum.year ) <- c("2010", "2011", "2012", "2013", "2014", "2015", "Total" )
 
-* Avondale  
-* Central Business Section   
-* Clifton-University Heights  
-* Corryville          
-* East Price Hill         
-* Evanston               
-* Over-The-Rhine           
-* Walnut Hills              
-* West End                
-* West Price Hill           
-* Westwood                  
-* Winton Hills
+pandoc.table( sum.year, plain.ascii = TRUE, caption = "Total complaints over time.")
+```
+
+##### Contact
+For more information for how these visualizations and calcuations were done, please visit: https://github.com/cenuno/MPA_Portfolio.

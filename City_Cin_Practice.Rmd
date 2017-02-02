@@ -62,7 +62,8 @@ https://data.cincinnati-oh.gov/Safer-Streets/Citizen-Complaints/r3vg-n6p3/data.
 
 ![](https://github.com/cenuno/MPA_Portfolio/raw/lab_01/cenuno_Cin_Citz_Complaints_3.png)
 
-##### Below is an interactive tool which visualizes how many monthly complaints were filed in their neighborhood from 2010 to 2015.
+
+##### Below is an interactive tool which visualizes how many monthly complaints were filed in each neighborhood from 2010 to 2015.
 
 ```{r, echo = FALSE}
 # Now we are going to create an interactive visual

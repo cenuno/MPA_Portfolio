@@ -3,7 +3,7 @@ output: html_document
 runtime: shiny
 ---
 ---
-title: "City_Cin_Practice"
+title: "Visualizing City of Cincinnati Monthly Citizen Complaints Against Police Officers "
 author: "Cristian E. Nuno"
 date: "2/1/2017"
 runtime: shiny

@@ -26,7 +26,7 @@ chicago.census.tracts <- readOGR( "https://data.cityofchicago.org/api/geospatial
 # Cristian E. Nuno's Census Data API
 # To acquire your own Census Data API in 5 minutes, please click here: 
 # http://api.census.gov/data/key_signup.html
-# I know it look sketchy, but the .gov put me at ease. Plus the federal government only asks for an email.
+# I know it looks sketchy, but the .gov put me at ease. Plus the federal government only asks for an email.
 my.key <- "6b2a3bf0f9ec6f097062213125bc40cad0351578" # Census Data API
 
 # Identify census tracts within Cook County
@@ -38,7 +38,7 @@ cook.county.census.tracts <- geo.make(state = "IL"
 # Download ACS 2011-2015 5-Year Estimate Data
 # Table number B01003 represents the Population table
 # A simple description of different tables does not currently exist
-# For more information on use of the 'api' package, please read:
+# For more information on use of the 'acs' package, please read:
 # https://cran.r-project.org/web/packages/acs/acs.pdf
 cook.county.acs.data <- acs.fetch( endyear = 2015
                                    , span = 5

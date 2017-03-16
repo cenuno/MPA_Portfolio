@@ -1,7 +1,7 @@
 ---
 title: "Chicago's Per Capita Income by Community Area, 2008-2012"
 author: "Cristian E. Nuno"
-date: "March 16, 2017"
+date: "3/16/2017"
 output: github_document
 html_document:
   df_print: paged

@@ -1,7 +1,7 @@
 Chicago's Per Capita Income by Community Area, 2008-2012
 ================
 Cristian E. Nuno
-March 16, 2017
+3/16/2017
 
 Visualizing Spatial Data
 ------------------------

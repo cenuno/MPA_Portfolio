@@ -4,8 +4,8 @@ author: "Cristian E. Nuno"
 date: "March 16, 2017"
 output: github_document
 html_document:
-df_print: paged
-keep_md: true
+  df_print: paged
+  keep_md: true
 --- 
 
 ## Visualizing Spatial Data
@@ -133,10 +133,14 @@ color.income <- as.character( color.income )
 
 ### Step 5: Visualize
 
-Congratulations: by reading this far you get to finally map information, thus making the unfamiliar familiar! This section of the tutorial uses a lot of plot customization. Click [here for more information on plot parameters](https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/par.html).
+Congratulations: by reading this far you get to finally map information, thus making the unfamiliar familiar! 
+
+This section of the tutorial uses a lot of plot customization. Click [here for more information on plot parameters](https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/par.html).
+
+*Caution: When replicating this code in RStudio, please delete the option "eval = FALSE". That option is found at the top of the r chunk, located inside the {} brackets. This option was put in place for GitHub viewers to view the output without seeing a tiny picture icon.*
 
 
-```{r, fig.height = 7, fig.width = 12}
+```{r Mapping, eval = FALSE}
 # Set plot parameters
 # Stretch your RStudio plot space to give yourself as much room as possible,
 # otherwise your map will be squished.

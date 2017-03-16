@@ -182,7 +182,11 @@ color.income <- as.character( color.income )
 
 ### Step 5: Visualize
 
-Congratulations: by reading this far you get to finally map information, thus making the unfamiliar familiar! This section of the tutorial uses a lot of plot customization. Click [here for more information on plot parameters](https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/par.html).
+Congratulations: by reading this far you get to finally map information, thus making the unfamiliar familiar!
+
+This section of the tutorial uses a lot of plot customization. Click [here for more information on plot parameters](https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/par.html).
+
+*Caution: When replicating this code in RStudio, please delete the option "eval = FALSE". That option is found at the top of the r chunk, located inside the {} brackets. This option was put in place for GitHub viewers to view the output without seeing a tiny picture icon.*
 
 ``` r
 # Set plot parameters
@@ -275,7 +279,5 @@ shadowtext( centroidLons, centroidLats
             , bg = "black"
 )
 ```
-
-![](cenuno_Chicago_PerCapitaIncome_2008to2012_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 ![](https://github.com/cenuno/MPA_Portfolio/raw/lab_01/Chicago_Visualizations/cenuno_PCI_2008to2012.png)

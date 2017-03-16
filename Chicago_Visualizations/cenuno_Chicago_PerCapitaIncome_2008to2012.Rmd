@@ -4,9 +4,8 @@ author: "Cristian E. Nuno"
 date: "March 16, 2017"
 output: github_document
 html_document:
-  df_print: paged
-  keep_md: true
-always_allow_html: yes
+df_print: paged
+keep_md: true
 --- 
 
 ## Visualizing Spatial Data
@@ -229,22 +228,4 @@ shadowtext( centroidLons, centroidLats
 )
 ```
 
-```{r}
-### Add interactive map
-library( leaflet )
-# Set value for the minZoom and maxZoom settings.
-leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
-
-# Play around
-m <- leaflet() %>%
-  addTiles() %>%  # Add default OpenStreetMap map tiles
-  addMarkers( lng = -87.629798
-              , lat = 41.878114
-              , popup = "City of Chicago"
-              ) %>%
-  addPolygons( data = chicago.com.area
-               , popup = chicago.com.area@data$community) %>% # Add community area boundaries
-  addProviderTiles( "OpenStreetMap_DE" )
-m  # Print the map
-```
-
+![](https://github.com/cenuno/MPA_Portfolio/raw/lab_01/Chicago_Visualizations/cenuno_PCI_2008to2012.png)

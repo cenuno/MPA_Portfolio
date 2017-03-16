@@ -1,12 +1,15 @@
 ---
 title: "Chicago's Per Capita Income by Community Area, 2008-2012"
 author: "Cristian E. Nuno"
-date: "3/5/2017"
+date: "March 16, 2017"
 output: github_document
-        
----
+html_document:
+  df_print: paged
+  keep_md: true
+always_allow_html: yes
+--- 
 
-### Visualizing Spatial Data
+## Visualizing Spatial Data
 
 Maps often translate unfamiliar information into a familiar setting. Using the City of Chicago, I hope that others can use this tutorial to produce other maps with other unfamiliar information. 
 
@@ -22,6 +25,7 @@ library( rgeos )
 library( TeachingDemos )
 library( maptools )
 library( dplyr )
+library( pander )
 ```
 
 ### Step 2: Load Necessary Datasets
@@ -62,7 +66,7 @@ chicago.com.area@data$area_numbe <- as.integer( chicago.com.area@data$area_numbe
 chicago.com.area@data$area_num_1 <- as.integer( chicago.com.area@data$area_num_1 )
 
 # Examine the structure of "chicago.com.area@data"
-str( chicago.com.area@data )
+str( chicago.com.area@data ) #%>% pander
 ```
 
 ### Step 3: Identify common variable to merge these two datasets
@@ -119,13 +123,13 @@ levels( income.break )
 
 # Apply the color schema to each level.
 # select( chicago.com.area@data, 5, 11, 17)
-color.pop <- cut( chicago.com.area@data$PER.CAPITA.INCOME
+color.income <- cut( chicago.com.area@data$PER.CAPITA.INCOME
                   , breaks = 5
                   , labels = col.schema
                  )
 
 # Convert the assigned colors to each value into character
-color.pop <- as.character( color.pop )
+color.income <- as.character( color.income )
 ```
 
 ### Step 5: Visualize
@@ -143,7 +147,7 @@ par( bg = "antiquewhite"
 
 # Plot
 plot( chicago.com.area
-      , col = color.pop
+      , col = color.income
 )
 
 # Add title text
@@ -157,7 +161,7 @@ mtext( line = 0.5
 )
 
 # Create legend text using the income breaks from Step 4
-legend.text.pop = c(   "$  8,120 - $24,300"
+legend.text.income = c(   "$  8,120 - $24,300"
                        , "$24,300 - $40,400"
                        , "$40,400 - $56,500"
                        , "$56,500 - $72,600"
@@ -169,7 +173,7 @@ legend( "topright"
         , pt.cex = 3
         , cex = 1
         , bg = "antiquewhite"
-        , legend = legend.text.pop
+        , legend = legend.text.income
         , col = col.schema
         , box.col = "antiquewhite"
         , title = "(In 2012 Dollars)"
@@ -186,7 +190,7 @@ com.area.num.name <- com.area.num.name[ order( com.area.num.name$Community.Area.
 com.area.num.name$Community.Area.Number <- as.character( com.area.num.name$Community.Area.Number )
 
 # Plot community area number and name
-# Use the paste() function to combine the two variables, separted by user defined space.
+# Use the paste() function to combine the two variables, separated by user defined space.
 legend("bottomleft"
        , legend = paste( com.area.num.name$Community.Area.Number
                          , com.area.num.name$COMMUNITY.AREA.NAME
@@ -223,5 +227,24 @@ shadowtext( centroidLons, centroidLats
             , col = "white"
             , bg = "black"
 )
+```
+
+```{r}
+### Add interactive map
+library( leaflet )
+# Set value for the minZoom and maxZoom settings.
+leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18))
+
+# Play around
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers( lng = -87.629798
+              , lat = 41.878114
+              , popup = "City of Chicago"
+              ) %>%
+  addPolygons( data = chicago.com.area
+               , popup = chicago.com.area@data$community) %>% # Add community area boundaries
+  addProviderTiles( "OpenStreetMap_DE" )
+m  # Print the map
 ```
 

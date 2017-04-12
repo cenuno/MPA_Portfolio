@@ -16,10 +16,11 @@ Arbolibro's mission is for children and adults to take books home, read, and enj
 
 ```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
 # image packages
-<<<<<<< HEAD
-=======
+#<<<<<<< HEAD
+#=======
 # putting this inside Arbolibro project tryingß
->>>>>>> 4e6854157bc31b2e61714874422ac8ee3b5c37ff
+# no idea what this is>>>>>>>
+# 4e6854157bc31b2e61714874422ac8ee3b5c37ff
 library(png)
 library(grid)
 img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book1.png')

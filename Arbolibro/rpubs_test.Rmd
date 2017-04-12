@@ -16,11 +16,6 @@ Arbolibro's mission is for children and adults to take books home, read, and enj
 
 ```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
 # image packages
-#<<<<<<< HEAD
-#=======
-# putting this inside Arbolibro project tryingß
-# no idea what this is>>>>>>>
-# 4e6854157bc31b2e61714874422ac8ee3b5c37ff
 library(png)
 library(grid)
 img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book1.png')
@@ -48,6 +43,21 @@ grid.raster(img)
 <span style="color:#3399ff">
 <font size="5">
 Working and going to school full-time only allowed once a week trips to the local library. One day, I thought of the idea of starting a book-share project in my Little Village neighborhood in Chicago, IL. Now our kids can grab a book right down the street instead of waiting for me to take them to the library.
+</font>
+</span>
+
+# Our Motivation
+
+<span style="color:#3399ff">
+<font size="5">
+Families from low-income communities struggle with literacy for several reasons. Limited education, a need to work multiple jobs, and little knowledge or access to resources. Arbolibro empowers and educates the community offering free literature for all ages.
+</font>
+</span>
+
+
+<span style="color:#3399ff">
+<font size="5">
+In the United States, book-sharing has been promoted as a valuable activity that parents and children can do together to enhance literacy skills. Reading with your child has many positive benefits and is the key to your child’s academic future. 
 </font>
 </span>
 

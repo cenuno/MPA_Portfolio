@@ -1,0 +1,50 @@
+---
+title: "Arbolibro: A Community Book-Share Project"
+author: ""
+output:
+  html_document:
+    css: dc_style.css
+    toc: true
+    toc_float: true
+---
+# Our Mission
+<span style="color:#3399ff">
+<font size="5">
+Arbolibro's mission is for children and adults to take books home, read, and enjoy them for free. 
+</font>
+</span>
+
+```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+# image packages
+# putting this inside Arbolibro project tryingß
+library(png)
+library(grid)
+img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book1.png')
+grid.raster(img)
+```
+
+</center>
+
+# Our History
+
+<span style="color:#3399ff">
+<font size="5">
+Arbolibro was born in August of 2016 by me, thanks to my kids and their love of reading. 
+</font>
+</span>
+
+```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+# image packages
+library(png)
+library(grid)
+img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book2.png')
+grid.raster(img)
+```
+
+<span style="color:#3399ff">
+<font size="5">
+Working and going to school full-time only allowed once a week trips to the local library. One day, I thought of the idea of starting a book-share project in my Little Village neighborhood in Chicago, IL. Now our kids can grab a book right down the street instead of waiting for me to take them to the library.
+</font>
+</span>
+
+

@@ -1,7 +1,12 @@
 h1{
   color: white;
   padding: 10px;
-  background-color: #3399ff
+  background-color: #DC143C
+}
+h2{
+  color: white;
+  padding: 10px;
+  background-color: #DC143C;
 }
 
 ul {

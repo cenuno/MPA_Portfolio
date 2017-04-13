@@ -1,20 +1,29 @@
 ---
-title: "Arbolibro: A Community Book-Share Project"
-author: ""
 output:
   html_document:
     css: dc_style.css
     toc: true
     toc_float: true
 ---
-# Our Mission
-<span style="color:#3399ff">
+# ArboLibro: A Community Book-Share Project
+
+```{r, echo=FALSE, fig.height=8, fig.width=12, fig.align='center'}
+# image packages
+library(png)
+library(grid)
+img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/Arbolibro_Logo.png')
+grid.raster(img)
+```
+
+
+## Our Mission
+<span style="color:#DC143C">
 <font size="5">
-Arbolibro's mission is for children and adults to take books home, read, and enjoy them for free. 
+ArboLibro's mission is for children and adults to take books home, read, and enjoy them for free. 
 </font>
 </span>
 
-```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+```{r, echo=FALSE, fig.height=6, fig.width=6, fig.align='center'}
 # image packages
 library(png)
 library(grid)
@@ -22,17 +31,15 @@ img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book1.png')
 grid.raster(img)
 ```
 
-</center>
+## Our History
 
-# Our History
-
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
-Arbolibro was born in August of 2016 by me, thanks to my kids and their love of reading. 
+ArboLibro was born in August of 2016 thanks to my kids and their love of reading. 
 </font>
 </span>
 
-```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+```{r, echo=FALSE, fig.height=6, fig.width=6, fig.align='center'}
 # image packages
 library(png)
 library(grid)
@@ -40,28 +47,28 @@ img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book2.png')
 grid.raster(img)
 ```
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
 Working and going to school full-time only allowed once a week trips to the local library. One day, I thought of the idea of starting a book-share project in my Little Village neighborhood in Chicago, IL. Now our kids can grab a book right down the street instead of waiting for me to take them to the library.
 </font>
 </span>
 
-# Our Motivation
+## Our Motivation
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
-Families from low-income communities struggle with literacy for several reasons. Limited education, a need to work multiple jobs, and little knowledge or access to resources. Arbolibro empowers and educates the community offering free literature for all ages.
+Families from low-income communities struggle with literacy for several reasons. Limited education, a need to work multiple jobs, and little knowledge or access to resources. ArboLibro **empowers and educates** the community by offering free literature for all ages.
 </font>
 </span>
 
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
 In the United States, book-sharing has been promoted as a valuable activity that parents and children can do together to enhance literacy skills. Reading with your child has many positive benefits and is the key to your child’s academic future. 
 </font>
 </span>
 
-```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+```{r, echo=FALSE, fig.height=6, fig.width=6, fig.align='center'}
 # image packages
 library(png)
 library(grid)
@@ -69,24 +76,63 @@ img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book3.png')
 grid.raster(img)
 ```
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
 It benefits children’s neurological, educational, psychological, social and linguistic future. Arbolibro offers a wide range of books from all ages in both English and Spanish. This project will bring an alternative to the community bringing them together.
 </font>
 </span>
 
-# Our Locations
 
-<span style="color:#3399ff">
+# Arbolibro Locations
+
+<span style="color:#DC143C">
 <font size="5">
-We currently have 4 locations in Little Village and Pilsen. We are looking forward to expanding to neighborhoods throughout Chicago in the near future!
+We currently have 4 locations in the neighborhoods ofLittle Village and Pilsen. ArboLibro strives to build in neighborhoods which are historically low-income. We are looking forward to expanding to neighborhoods throughout Chicago in the near future.
 </font>
 </span>
 
-```{r, echo=FALSE, fig.height=4, fig.width=8, fig.align='center'}
+
+
+```{r Necessary Packages, echo=FALSE, message=FALSE}
 library( leaflet )
 library( magrittr )
 library( readxl )
+library( rgdal )
+library( stringi )
+library( lucr )
+```
+
+
+
+```{r Import Data, echo=FALSE, results='hide'}
+# Census Data - Selected socioeconomic indicators in Chicago, 2008 – 2012
+dat <- read.csv( "https://data.cityofchicago.org/api/views/kn9c-c2s2/rows.csv?accessType=DOWNLOAD"
+                 , header = TRUE
+                 , stringsAsFactors = FALSE)
+# The last row in this dataset is a row representing the entire city
+city.wide.info <- tail( dat, n = 1)
+
+# Remove the last row from the dataset
+dat <- dat[ -nrow( dat ), ]
+
+# City of Chicago Community Area Boundaries in GeoJSON format
+chicago.com.area <- readOGR("https://data.cityofchicago.org/api/geospatial/cauq-8yn6?method=export&format=GeoJSON"
+                            , "OGRGeoJSON"
+                            , stringsAsFactors = FALSE
+)
+# Transform spatial polygon data frame's "community area number"" variable
+# from character to integer
+chicago.com.area@data$area_numbe <- as.integer( chicago.com.area@data$area_numbe )
+chicago.com.area@data$area_num_1 <- as.integer( chicago.com.area@data$area_num_1 )
+
+chicago.com.area@data <- data.frame( chicago.com.area@data
+                                     , dat[
+                                       match( chicago.com.area@data[ , "area_numbe" ]
+                                              , dat[ , "Community.Area.Number"  ]
+                                       )
+                                       , ]
+)
+
 arbolibro <- read_excel( path = "/Users/cristiannuno/Desktop/Syracuse/arbolibro.xlsx"
                    , sheet = 1
                    )
@@ -97,11 +143,22 @@ arbolibro$ActiveURL <- paste0("<a href='"
                                    , arbolibro$LocationWebsite
                                    ,"</a>"
                                    )
+```
+
+
+
+```{r Design Map, echo=FALSE, fig.height=4, fig.width=8, fig.align='center'}
+# Design a color palette for the map
+pal <- colorNumeric(
+  palette = "YlGnBu",
+  domain = NULL #chicago.com.area$PER.CAPITA.INCOME # vector 
+)
+
 # Build Map
-mapArbolibro <- leaflet( data = arbolibro ) %>% # add locations dataset
+mapArbolibro <- leaflet( chicago.com.area ) %>% # add locations dataset
   setView( lng = -87.705823, lat = 41.845816, zoom = 12) %>% # Set map to Little Village neighborhood
   addTiles() %>%  # Add map background
-  addMarkers( lng = ~Long, lat = ~Lat
+  addMarkers( data = arbolibro, lng = ~Long, lat = ~Lat
               # Add useful information onto each marker's popup
               , popup = paste0( "<b> Location Name: </b>"
                                 , arbolibro$LocationName
@@ -116,6 +173,36 @@ mapArbolibro <- leaflet( data = arbolibro ) %>% # add locations dataset
                                 , arbolibro$ActiveURL
                                 )
               ) %>%
+  addPolygons( smoothFactor = 0.2
+              , fillOpacity = 0.7
+              # Color the polygons based on the value of their
+              # per capita income
+              , color = ~pal(PER.CAPITA.INCOME)
+              # Add useful information onto the popup
+              , popup = paste0( "<b>Community Area Name: </b>", stri_trans_totitle( chicago.com.area@data$community ), "<br>"
+                                , "<b>Community Area Number: </b>", chicago.com.area@data$area_numbe, "<br>"
+                                , "<b>Per Capita Income: </b>", to_currency( chicago.com.area$PER.CAPITA.INCOME
+                                                                             , currency_symbol = "$"
+                                                                             )
+                                )
+              # Whenever someone hovers their mouse above a polygon,
+              # make sure they know which community they are in
+              , label = chicago.com.area@data$community
+              , labelOptions = labelOptions( textsize = "25px", textOnly = TRUE )
+              , highlightOptions = highlightOptions( color = "orange"
+                                                      , weight = 6
+                                                      , bringToFront = TRUE
+                                                      )
+                
+  ) %>%
+  # Make sure people know what the color values indicate
+  addLegend("bottomleft"
+            , pal = pal # use the same color palette we made earlier
+            , values = ~PER.CAPITA.INCOME # assign values to the legend
+            , title = "Per Capita Income (in 2012 dollars)"
+            , labFormat = labelFormat(prefix = "$")
+            , opacity = 1
+  ) %>%
   addProviderTiles( "OpenStreetMap_DE" )
 
 # Display Map
@@ -125,39 +212,40 @@ mapArbolibro
 
 # In the News
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
 Arbolibro has [received community attention](https://soundcloud.com/vocalo/domingosenvocalo-rayuelafm07316) from Lawndale News and Vocalo 91.1 FM, a segment called Rayuela FM which focuses on literature.
 </font>
 </span>
 
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="3">
 The interview starts at the 21:15 mark.
 </font>
 </span>
 
 
-# Feedback
+# Contact Us
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
 Please support the Arbolibro project by [recommending where where we should build our next Arbolibro](https://goo.gl/forms/yzEytmYNrLCtumaF2).
 </font>
 </span>
 
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
 For immediate feedback, please email the founder of Arborlibro, Gonzalo Rizo, at gonzalorizo@hotmail.com. *This page was last updated on April 12, 2017*.
 </font>
 </span>
 
-# Website Design
+## Website Design
 
-<span style="color:#3399ff">
+<span style="color:#DC143C">
 <font size="5">
 This website was designed by Cristian E. Nuno. To view more of his work, see his [GitHub page](https://github.com/cenuno) and his [LinkedIn page](https://www.linkedin.com/in/cristiannuno). You may email him at nuno.e.cristian@gmail.com.
 </font>
 </span>
+

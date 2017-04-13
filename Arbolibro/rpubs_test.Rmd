@@ -61,4 +61,103 @@ In the United States, book-sharing has been promoted as a valuable activity that
 </font>
 </span>
 
+```{r, echo=FALSE, fig.height=4, fig.width=4, fig.align='center'}
+# image packages
+library(png)
+library(grid)
+img <- readPNG('/Users/cristiannuno/Desktop/Syracuse/book3.png')
+grid.raster(img)
+```
 
+<span style="color:#3399ff">
+<font size="5">
+It benefits children’s neurological, educational, psychological, social and linguistic future. Arbolibro offers a wide range of books from all ages in both English and Spanish. This project will bring an alternative to the community bringing them together.
+</font>
+</span>
+
+# Our Locations
+
+<span style="color:#3399ff">
+<font size="5">
+We currently have 4 locations in Little Village and Pilsen. We are looking forward to expanding to neighborhoods throughout Chicago in the near future!
+</font>
+</span>
+
+```{r, echo=FALSE, fig.height=4, fig.width=8, fig.align='center'}
+library( leaflet )
+library( magrittr )
+library( readxl )
+arbolibro <- read_excel( path = "/Users/cristiannuno/Desktop/Syracuse/arbolibro.xlsx"
+                   , sheet = 1
+                   )
+# Transform location urls from static to active
+arbolibro$ActiveURL <- paste0("<a href='"
+                                   , arbolibro$LocationWebsite
+                                   , "' target='_blank'>"
+                                   , arbolibro$LocationWebsite
+                                   ,"</a>"
+                                   )
+# Build Map
+mapArbolibro <- leaflet( data = arbolibro ) %>% # add locations dataset
+  setView( lng = -87.705823, lat = 41.845816, zoom = 12) %>% # Set map to Little Village neighborhood
+  addTiles() %>%  # Add map background
+  addMarkers( lng = ~Long, lat = ~Lat
+              # Add useful information onto each marker's popup
+              , popup = paste0( "<b> Location Name: </b>"
+                                , arbolibro$LocationName
+                                , "<br>"
+                                , "<b>Location Address: </b>"
+                                , arbolibro$Location
+                                , "<br>"
+                                , "<b> Location Type: </b>"
+                                , arbolibro$Type
+                                , "<br>"
+                                , "<b> Location Website: </b>"
+                                , arbolibro$ActiveURL
+                                )
+              ) %>%
+  addProviderTiles( "OpenStreetMap_DE" )
+
+# Display Map
+mapArbolibro
+
+```
+
+# In the News
+
+<span style="color:#3399ff">
+<font size="5">
+Arbolibro has [received community attention](https://soundcloud.com/vocalo/domingosenvocalo-rayuelafm07316) from Lawndale News and Vocalo 91.1 FM, a segment called Rayuela FM which focuses on literature.
+</font>
+</span>
+
+
+<span style="color:#3399ff">
+<font size="3">
+The interview starts at the 21:15 mark.
+</font>
+</span>
+
+
+# Feedback
+
+<span style="color:#3399ff">
+<font size="5">
+Please support the Arbolibro project by [recommending where where we should build our next Arbolibro](https://goo.gl/forms/yzEytmYNrLCtumaF2).
+</font>
+</span>
+
+
+<span style="color:#3399ff">
+<font size="5">
+For immediate feedback, please email the founder of Arborlibro, Gonzalo Rizo, at gonzalorizo@hotmail.com. *This page was last updated on April 12, 2017*.
+</font>
+</span>
+
+# Website Design
+
+<span style="color:#3399ff">
+<font size="5">
+This website was designed by Cristian E. Nuno. To view more of his work, see his [GitHub page](https://github.com/cenuno) and his [LinkedIn page](https://www.linkedin.com/in/cristiannuno). You may email him at nuno.e.cristian@gmail.com.
+</font>
+</span>

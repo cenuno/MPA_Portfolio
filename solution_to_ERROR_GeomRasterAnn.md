@@ -9,7 +9,7 @@ Here are lines of code to be run in RStudio to help you solve this error.
 devtools::install_github('thomasp85/ggforce')
 devtools::install_github('thomasp85/ggraph')
 devtools::install_github("slowkow/ggrepel")
-devtools::install_github("hadley/ggplot2")
+devtools::install_github("hadley/ggplot2@v2.2.0") 
 devtools::install_github("dkahle/ggmap")
 ````
 
